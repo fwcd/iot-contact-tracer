@@ -1,0 +1,15 @@
+#!/bin/bash
+export CNG_PATH=$PWD/contiki-ng
+export SRC_PATH=$PWD/src
+export LOG_PATH=$PWD/logs
+docker run --privileged \
+           --net=host \
+           --sysctl net.ipv6.conf.all.disable_ipv6=0 \
+           --mount type=bind,source=$CNG_PATH,destination=/home/user/contiki-ng \
+           --mount type=bind,source=$SRC_PATH,destination=/home/user/src \
+           --mount type=bind,source=$LOG_PATH,destination=/home/user/logs \
+           --device /dev/bus/usb:/dev/bus/usb \
+           -e DISPLAY=$DISPLAY \
+           -v /tmp/.X11-unix \
+           -v $XAUTHORITY:/home/user/.Xauthority \
+           -ti --rm contiker/contiki-ng
