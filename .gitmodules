@@ -1,0 +1,4 @@
+[submodule "embedded-client/contiki-ng"]
+	path = embedded-client/contiki-ng
+	url = https://github.com/contiki-ng/contiki-ng.git
+	branch = master
