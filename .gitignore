@@ -1,0 +1,22 @@
+.DS_Store
+.vscode
+
+# Python
+__pycache__
+
+# Build artifacts
+build
+*.exp
+*.o
+*.so
+*.native
+*.sky
+
+# Java
+bin
+target
+.classpath
+.project
+.idea
+.settings
+.gradle
