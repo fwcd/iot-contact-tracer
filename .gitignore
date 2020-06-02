@@ -12,6 +12,7 @@ build
 *.so
 *.native
 *.sky
+*.cooja
 
 # Java
 bin

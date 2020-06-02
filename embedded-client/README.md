@@ -16,14 +16,6 @@ Specifically, you will have to pull the Docker image for `contiki-ng`:
 
 After you make sure that Docker is running, you can run (depending on whether you run Linux/macOS or Windows) one of the `contiker` scripts in this repo to launch a shell in a new Contiki container.
 
-## Building
-To build one of the projects from the source directory, open a shell in the container with `./contiker` and run:
-
-```bash
-cd ../src/your/project # Assuming the session started in ~/contiki-ng
-make
-```
-
 ## Running Cooja
 To launch Cooja (the GUI networking simulator), you can run:
 
@@ -35,5 +27,5 @@ Or - alternatively - inside the container:
 
 > Note that you need to start an X server (such as `Vcxsrv`) prior to this if you are running Docker on Windows
 
-## Running a Project in Cooja
-First, open Cooja as described above. Then create a new simulation (in the `File` menu) and add a new `Sky` mote, where the built `*.sky` file from your project is configured as your `Contiki process/Firmware`. Now add as many motes as you like and start the simulation.
+## Building and Running the Project in Cooja
+First, open Cooja as described above. Then create a new simulation (in the `File` menu) and add a new `Cooja` mote, where the `*.c` source file from the project is configured as your `Contiki process/Firmware`. Now add as many motes as you like and start the simulation.
