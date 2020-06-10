@@ -3,8 +3,10 @@ from socketserver import StreamRequestHandler, TCPServer
 
 class CNGAdapterTCPHandler(StreamRequestHandler):
     def handle(self):
-        raw = self.rfile.readline().strip()
-        print(raw)
+        its = 0
+        while True:
+            raw = self.rfile.readline().strip()
+            print(raw)
 
 def main():
     parser = argparse.ArgumentParser()
