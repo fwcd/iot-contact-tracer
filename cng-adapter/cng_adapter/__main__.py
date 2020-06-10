@@ -1,12 +1,18 @@
 import argparse
+import re
+import socket
 from socketserver import StreamRequestHandler, TCPServer
 
 class CNGAdapterTCPHandler(StreamRequestHandler):
     def handle(self):
-        its = 0
         while True:
-            raw = self.rfile.readline().strip()
+            raw = self.rfile.readline().decode("utf-8").strip()
             print(raw)
+
+class CNGAdapterTCPServer(TCPServer):
+    def server_bind(self):
+        self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.socket.bind(self.server_address)
 
 def main():
     parser = argparse.ArgumentParser()
@@ -17,7 +23,11 @@ def main():
 
     with TCPServer(("localhost", port), CNGAdapterTCPHandler) as server:
         print(f"Listening on port {port} for TCP connections...")
-        server.serve_forever()
+        try:
+            server.serve_forever()
+        except KeyboardInterrupt:
+            print("Shutting down...")
+            pass
 
 if __name__ == "__main__":
     main()
