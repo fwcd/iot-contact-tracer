@@ -1,6 +1,7 @@
 #include <random.h>
 #include <contiki.h>
 #include <string.h>
+#include <clock.h>
 #include <dev/leds.h>
 #include <net/nullnet/nullnet.h>
 #include <net/netstack.h>
@@ -41,7 +42,7 @@ struct rolling_identifier rolling_identifier_generate(void) {
     struct rolling_identifier ident;
     uint8_t i;
     for (i = 0; i < ARRAY_SIZE(ident.value); i++) {
-        ident.value[i] = random_rand();
+        ident.value[i] = random_rand() ^ (i * 1000) ^ (node_id * 100) ^ clock_time();
     }
     return ident;
 }
