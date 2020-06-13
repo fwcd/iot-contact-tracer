@@ -41,24 +41,30 @@ uint8_t rolling_identifier_equals(struct rolling_identifier lhs, struct rolling_
     return 1;
 }
 
-/** A structure holding the full history a person. */
+/** A cyclic buffer holding the full history of a person. */
 struct identifier_store {
     struct rolling_identifier identifiers[STORED_IDENTIFIER_COUNT];
+    uint16_t next_in;
+    uint16_t next_out;
     uint16_t size;
 };
 
 void identifier_store_insert(struct identifier_store *self, struct rolling_identifier identifier) {
-    if (self->size < ARRAY_SIZE(self->identifiers)) {
-        self->identifiers[self->size] = identifier;
+    uint16_t capacity = ARRAY_SIZE(self->identifiers);
+
+    self->identifiers[self->next_in] = identifier;
+    self->next_in = (self->next_in + 1) % capacity;
+
+    if (self->size < capacity) {
         self->size++;
     } else {
-        LOG_WARN("Identifier store overflowing.\n");
+        self->next_out = (self->next_out + 1) % capacity;
     }
 }
 
 uint8_t identifier_store_contains(struct identifier_store *self, struct rolling_identifier identifier) {
     uint8_t i;
-    for (i = 0; i < self->size; i++) {
+    for (i = 0; i < self->next_in; i++) {
         if (rolling_identifier_equals(self->identifiers[i], identifier)) {
             return 1;
         }
@@ -71,6 +77,13 @@ struct known_identifiers {
     struct identifier_store own;
     struct identifier_store others[PERSON_COUNT];
 };
+
+struct rolling_identifier known_identifiers_current(struct known_identifiers *self) {
+    if (self->own.size == 0) {
+        LOG_ERR("Cannot fetch current identifier without one being present, things will fail from here on.\n");
+    }
+    return self->own.identifiers[self->own.next_out];
+}
 
 /** Generates a new identifier (pseudo-)randomly. */
 struct rolling_identifier generate_identifier(void) {
