@@ -5,5 +5,5 @@ A TCP server that accepts connections from Contiki-NG/Coojas serial port interfa
 * Python 3
 
 ## Running
-* Use `python3 -m ct_server` to run the development server (inside the venv).
+* Use `python3 -m cng_adapter` to run the development server (inside the venv).
 * The server is now listening under `http://localhost:7533`
