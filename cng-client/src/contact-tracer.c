@@ -135,6 +135,9 @@ void receive(const void *data, uint16_t len, const linkaddr_t *src, const linkad
         memcpy(&ident, data, sizeof(struct rolling_identifier));
 
         identifier_store_insert(&known.others, ident);
+        if (known.others.size % 50 == 0) {
+            LOG_INFO("Stored %d identifiers from others.\n", known.others.size);
+        }
     } else {
         LOG_WARN("Got packet of unrecognized size %d (instead of the expected size %d)\n", len, sizeof(struct rolling_identifier));
     }
