@@ -147,7 +147,7 @@ AUTOSTART_PROCESSES(&contact_tracer_process);
 
 PROCESS_THREAD(contact_tracer_process, env, data) {
     static struct etimer timer;
-    static uint16_t elapsed = 0;
+    static uint16_t elapsed = EXPIRATION_TIME;
 
     PROCESS_BEGIN();
 
@@ -156,15 +156,18 @@ PROCESS_THREAD(contact_tracer_process, env, data) {
     etimer_set(&timer, REBROADCAST_TIME * CLOCK_SECOND);
 
     while (true) {
-        PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer));
-        elapsed += REBROADCAST_TIME;
-
         if (elapsed >= EXPIRATION_TIME) {
+            LOG_INFO("Rolling the current identifier...\n");
             identifier_store_roll(&known.own);
             elapsed = 0;
         }
 
+        LOG_DBG("Broadcasting identifier...\n");
         broadcast(known_identifiers_current(&known));
+
+        PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer));
+        etimer_reset(&timer);
+        elapsed += REBROADCAST_TIME;
     }
 
     PROCESS_END();
