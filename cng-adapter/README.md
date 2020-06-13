@@ -13,6 +13,6 @@ A TCP server that accepts connections from Contiki-NG/Coojas serial port interfa
 * Use `python3 -m cng_adapter` to run the development server (inside the venv).
 * The server is now listening under `http://localhost:7533`
 * Now start `cooja`, create a simulation, setup the motes and for each mote:
-    * Connect the adapter in Cooja under `Tools > Serial Socket (SERVER) > YourNode` with:
+    * Connect the adapter in Cooja under `Tools > Serial Socket (CLIENT) > YourNode` with:
         * Host: `localhost`
         * Port: `7533`
