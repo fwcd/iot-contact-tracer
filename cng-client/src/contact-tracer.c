@@ -134,8 +134,8 @@ void receive(const void *data, uint16_t len, const linkaddr_t *src, const linkad
         struct rolling_identifier ident;
         memcpy(&ident, data, sizeof(struct rolling_identifier));
 
-        identifier_store_insert(&known.others, ident);
-        if (known.others.size % 50 == 0) {
+        if (!identifier_store_contains(&known.others, ident)) {
+            identifier_store_insert(&known.others, ident);
             LOG_INFO("Stored %d identifiers from others.\n", known.others.size);
         }
     } else {
