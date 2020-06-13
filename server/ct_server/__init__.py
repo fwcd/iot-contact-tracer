@@ -5,11 +5,10 @@ from flask_sqlalchemy import SQLAlchemy
 
 import ct_server.blueprints.api as api
 import ct_server.blueprints.hello as hello
+from ct_server.models import db
 
 class Configuration(metaclass=MetaFlaskEnv):
     ENV_LOAD_ALL = True
-
-db = SQLAlchemy()
 
 def create_app():
     app = Flask(__name__, instance_relative_config=True)
@@ -24,4 +23,8 @@ def create_app():
         pass
 
     db.init_app(app)
+    with app.app_context():
+        db.create_all()
+        db.session.commit()
+
     return app

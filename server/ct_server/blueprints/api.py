@@ -1,14 +1,12 @@
 from flask import Blueprint
-from flask_restful import Api, Resource
+from flask_restful import Api
 
-class HelloResource(Resource):
-    def get(self):
-        return "Hello REST!"
+from ct_server.resources.exposures import Exposures
 
 def create_blueprint():
     bp = Blueprint("api", __name__, url_prefix="/api/v1")
     api = Api(bp)
 
-    api.add_resource(HelloResource, "/hello")
+    api.add_resource(Exposures, "/exposures/<string:id>")
 
     return bp
