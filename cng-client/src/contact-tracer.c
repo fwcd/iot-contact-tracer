@@ -1,6 +1,9 @@
 #include <random.h>
 #include <contiki.h>
+#include <string.h>
 #include <dev/leds.h>
+#include <net/nullnet/nullnet.h>
+#include <net/netstack.h>
 #include <sys/node-id.h>
 #include <sys/log.h>
 
@@ -8,7 +11,7 @@
 #define LOG_LEVEL LOG_LEVEL_INFO
 
 // The interval of seconds at which new identifiers are generated
-#define EXPIRATION_TIME (5 * 60)
+#define EXPIRATION_TIME (40 * 60)
 
 // The interval of seconds at which identifiers are broadcasted
 #define REBROADCAST_TIME 10
@@ -16,19 +19,21 @@
 // The number of seconds for which an identifier is stored
 #define INCUBATION_TIME (14 * 24 * 3600)
 
-// The number of stored identifiers for a single person
-#define STORED_IDENTIFIER_COUNT ((INCUBATION_TIME) / (EXPIRATION_TIME))
+// The number of stored identifiers for a single person.
+// Ideally this should be equivalent to:
+// #define STORED_IDENTIFIER_COUNT ((INCUBATION_TIME) / (EXPIRATION_TIME))
+#define STORED_IDENTIFIER_COUNT 504
 
-// The (theoretical) number of other persons for which a full history could be maintained
-#define PERSON_COUNT 2
+// The identifier size in bytes (must be even)
+#define IDENTIFIER_SIZE 2
 
 // == Common ==
 
 #define ARRAY_SIZE(XS) (sizeof(XS) / sizeof(XS[0]))
 
-/** A rolling identifier to identify a per. */
+/** A rolling identifier to identify a person. */
 struct rolling_identifier {
-    uint16_t value[4];
+    uint16_t value[IDENTIFIER_SIZE / 2];
 };
 
 /** Generates a new identifier (pseudo-)randomly. */
@@ -96,7 +101,7 @@ void identifier_store_roll(struct identifier_store *self) {
 /** A structure holding the full history of own and other identifiers. */
 struct known_identifiers {
     struct identifier_store own;
-    struct identifier_store others[PERSON_COUNT];
+    struct identifier_store others;
 };
 
 void known_identifiers_init(struct known_identifiers *self) {
@@ -111,6 +116,30 @@ struct rolling_identifier known_identifiers_current(struct known_identifiers *se
     return self->own.identifiers[self->own.next_out];
 }
 
+// == Globals ==
+
+static struct known_identifiers known;
+
+// == Networking ==
+
+void broadcast(struct rolling_identifier identifier) {
+    nullnet_len = sizeof(identifier);
+    nullnet_buf = (uint8_t *) &identifier;
+    NETSTACK_NETWORK.output(NULL);
+}
+
+void receive(const void *data, uint16_t len, const linkaddr_t *src, const linkaddr_t *dest) {
+    if (len == sizeof(struct rolling_identifier)) {
+        // Make sure that the structure is aligned properly
+        struct rolling_identifier ident;
+        memcpy(&ident, data, sizeof(struct rolling_identifier));
+
+        identifier_store_insert(&known.others, ident);
+    } else {
+        LOG_WARN("Got packet of unrecognized size %d (instead of the expected size %d)\n", len, sizeof(struct rolling_identifier));
+    }
+}
+
 // == Main ==
 
 PROCESS(contact_tracer_process, "Contact tracer process");
@@ -119,11 +148,11 @@ AUTOSTART_PROCESSES(&contact_tracer_process);
 PROCESS_THREAD(contact_tracer_process, env, data) {
     static struct etimer timer;
     static uint16_t elapsed = 0;
-    static struct known_identifiers known;
 
     PROCESS_BEGIN();
 
     known_identifiers_init(&known);
+    nullnet_set_input_callback(receive);
     etimer_set(&timer, REBROADCAST_TIME * CLOCK_SECOND);
 
     while (true) {
@@ -135,7 +164,7 @@ PROCESS_THREAD(contact_tracer_process, env, data) {
             elapsed = 0;
         }
 
-        // TODO
+        broadcast(known_identifiers_current(&known));
     }
 
     PROCESS_END();
