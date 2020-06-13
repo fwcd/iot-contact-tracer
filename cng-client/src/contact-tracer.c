@@ -60,12 +60,14 @@ uint8_t rolling_identifier_equals(struct rolling_identifier lhs, struct rolling_
 /** A cyclic buffer holding the full history of a person. */
 struct identifier_store {
     struct rolling_identifier identifiers[STORED_IDENTIFIER_COUNT];
+    uint16_t last_in;
     uint16_t next_in;
     uint16_t next_out;
     uint16_t size;
 };
 
 void identifier_store_init(struct identifier_store *self) {
+    self->last_in = -1;
     self->next_in = 0;
     self->next_out = 0;
     self->size = 0;
@@ -75,6 +77,7 @@ void identifier_store_insert(struct identifier_store *self, struct rolling_ident
     uint16_t capacity = ARRAY_SIZE(self->identifiers);
 
     self->identifiers[self->next_in] = identifier;
+    self->last_in = (self->last_in + 1) % capacity;
     self->next_in = (self->next_in + 1) % capacity;
 
     if (self->size < capacity) {
@@ -114,7 +117,7 @@ struct rolling_identifier known_identifiers_current(struct known_identifiers *se
     if (self->own.size == 0) {
         LOG_ERR("Cannot fetch current identifier without one being present, things will fail from here on.\n");
     }
-    return self->own.identifiers[self->own.next_out];
+    return self->own.identifiers[self->own.last_in];
 }
 
 // == Globals ==
