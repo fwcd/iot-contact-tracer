@@ -3,6 +3,7 @@ from flask import Flask
 from flask_env import MetaFlaskEnv
 from flask_sqlalchemy import SQLAlchemy
 
+import ct_server.blueprints.api as api
 import ct_server.blueprints.hello as hello
 
 class Configuration(metaclass=MetaFlaskEnv):
@@ -13,6 +14,8 @@ db = SQLAlchemy()
 def create_app():
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_object(Configuration)
+
+    app.register_blueprint(api.create_blueprint())
     app.register_blueprint(hello.create_blueprint())
 
     try:
