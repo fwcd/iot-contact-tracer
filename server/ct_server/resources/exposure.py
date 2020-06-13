@@ -13,9 +13,13 @@ class ExposureResource(Resource):
         return Exposure.query.filter_by(id=id).first_or_404()
 
     def put(self, id):
+        if bool(Exposure.query.filter_by(id=id).first()):
+            return "Already exists", 200, {}
+
         exposure = Exposure(id=id)
         db.session.add(exposure)
         db.session.commit()
+
         return "Created", 201, {}
 
 class ExposureListResource(Resource):
