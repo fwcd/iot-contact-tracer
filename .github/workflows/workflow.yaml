@@ -8,32 +8,27 @@ defaults:
     working-directory: server
 
 jobs: 
-  build:
+  deploy:
     name: Build and push server image to GitHub packages
     runs-on: ubuntu-latest
     steps:
     - name: Checkout branch
       uses: actions/checkout@v2
+
     - name: Build and push image
       uses: docker/build-push-action@v1
       with:
         registry: docker.pkg.github.com
-        dockerfile: server/devops/Dockerfile
+        path: server
+        dockerfile: devops/Dockerfile
         repository: fwcd/ct-server
         username: fwcd
         password: ${{ secrets.GITHUB_TOKEN }}
         tags: latest
         tag_with_sha: true
 
-  deploy:
-    name: Deploy server to Kubernetes cluster
-    runs-on: ubuntu-latest
-    steps:
     - name: Install KubeCTL
       uses: azure/setup-kubectl@v1
-  
-    - name: Checkout branch
-      uses: actions/checkout@v2
 
     - name: Replace image in deployment file
       run: TAG=$(echo $GITHUB_SHA | head -c7) && sed -i 's|<IMAGE>docker.pkg.github.com/fwcd/ct-server|:'${TAG}'|' devops/deployment.yml
