@@ -1,4 +1,6 @@
 from flask_restful import marshal_with, fields, Resource
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.sql import text
 
 from ct_server.models import Exposure, db
 
@@ -6,6 +8,7 @@ exposure_marshaller = {
     "id": fields.String
     # "timestamp": fields.DateTime(dt_format="iso8601")
 }
+
 
 class ExposureResource(Resource):
     @marshal_with(exposure_marshaller)
@@ -22,7 +25,17 @@ class ExposureResource(Resource):
 
         return "Created", 201, {}
 
+
 class ExposureListResource(Resource):
     @marshal_with(exposure_marshaller)
     def get(self):
         return Exposure.query.all()
+
+
+class HealthCheckResource(Resource):
+    def get(self):
+        try:
+            db.session.query("1").from_statement(text("SELECT 1")).all()
+            return "Healthy", 200, {}
+        except SQLAlchemyError:
+            return "DB connection lost", 500, {}

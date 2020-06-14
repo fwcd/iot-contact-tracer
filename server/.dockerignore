@@ -1,0 +1,6 @@
+devops/Dockerfile
+devops/deployment.yml
+.dockerignore
+.env
+README.md
+requirements.txt
