@@ -19,4 +19,6 @@ def create_handler(url):
                         print(f"Reported exposure {body}: {rsp.content}")
                     else:
                         print(f"Unsupported request name: {name}")
+                else:
+                    print(f"Got: {raw}")
     return CNGAdapterTCPHandler
