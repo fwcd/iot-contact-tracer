@@ -5,20 +5,20 @@ on:
 
 jobs: 
   build:
-    name: Build and push image to GitHub packages
+    name: Build and push server image to GitHub packages
     runs-on: ubuntu-latest
     steps:
     - name: Build and push image
       uses: docker/build-push-action@v1
       with:
-        username: ${{ github.actor }}
-        password: ${{ github.token }}
+        username: fwcd
+        password: ${{ secrets.GITHUB_TOKEN }}
         repository: fwcd/ct-server
         tags: latest
         tag_with_sha: true
 
   deploy:
-    name: Deploy service to Kubernetes cluster
+    name: Deploy server to Kubernetes cluster
     runs-on: ubuntu-latest
     steps:
     - name: Install KubeCTl
@@ -28,16 +28,16 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Replace image in deployment file
-      run: TAG=$(echo $GITHUB_SHA | head -c7) && sed -i 's|<IMAGE>docker.pkg.github.com/fwcd/ct-server|:'${TAG}'|' $GITHUB_WORKSPACE/devops/deployment.yml
+      run: TAG=$(echo $GITHUB_SHA | head -c7) && sed -i 's|<IMAGE>docker.pkg.github.com/fwcd/ct-server|:'${TAG}'|' $GITHUB_WORKSPACE/server/devops/deployment.yml
 
     - name: Write Kubeconfig to file
       run: echo ${{ secrets.KUBE_CONFIG_DATA }} | base64 --decode > /tmp/kubeconfig
 
     - name: Create temporary docker registry secret
-      run: kubectl create secret docker-registry reg-fwcd --docker-server=docker.pkg.github.com --docker-username=${{ github.actor }} --docker-password=${{ github.token }}
+      run: kubectl create secret docker-registry reg-fwcd --docker-server=docker.pkg.github.com --docker-username=fwcd --docker-password=${{ secrets.GITHUB_TOKEN }}
   
     - name: Deploy to cluster
-      run: kubectl apply --kubeconfig /tmp/kubeconfig -f $GITHUB_WORKSPACE/devops/deployment.yml
+      run: kubectl apply --kubeconfig /tmp/kubeconfig -f $GITHUB_WORKSPACE/server/devops/deployment.yml
     
     - name: Delete secret
       run: kubectl delete secret reg-fwcd
