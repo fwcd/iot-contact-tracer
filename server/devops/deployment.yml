@@ -1,0 +1,49 @@
+apiiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ct-server
+  labels:
+    app: ct-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ct-server
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  minReadySeconds: 5
+  template:
+    metadata:
+      labels:
+        app: ct-server
+    spec:
+      containers:
+      - name: ct-server
+        image: <IMAGE>
+        ports:
+        - containerPort: 5000
+        resources:
+          requests:
+            cpu: 100m
+          limits:
+            cpu: 100m
+      imagePullSecrets:
+      - name: reg-fwcd
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-ct-server
+  annotations:
+    # use the shared ingress-nginx
+    kubernetes.io/ingress.class: "nginx"
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /
+        backend:
+          serviceName: ct-server
+          servicePort: 5000
