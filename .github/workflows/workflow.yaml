@@ -3,6 +3,10 @@ on:
     branches:
       - master
 
+defaults:
+  run:
+    working-directory: server
+
 jobs: 
   build:
     name: Build and push server image to GitHub packages
@@ -12,9 +16,10 @@ jobs:
       uses: docker/build-push-action@v1
       with:
         registry: docker.pkg.github.com
+        dockerfile: devops/Dockerfile
+        repository: fwcd/ct-server
         username: fwcd
         password: ${{ secrets.GITHUB_TOKEN }}
-        repository: fwcd/ct-server
         tags: latest
         tag_with_sha: true
 
@@ -29,7 +34,7 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Replace image in deployment file
-      run: TAG=$(echo $GITHUB_SHA | head -c7) && sed -i 's|<IMAGE>docker.pkg.github.com/fwcd/ct-server|:'${TAG}'|' $GITHUB_WORKSPACE/server/devops/deployment.yml
+      run: TAG=$(echo $GITHUB_SHA | head -c7) && sed -i 's|<IMAGE>docker.pkg.github.com/fwcd/ct-server|:'${TAG}'|' devops/deployment.yml
 
     - name: Write Kubeconfig to file
       run: echo ${{ secrets.KUBE_CONFIG_DATA }} | base64 --decode > /tmp/kubeconfig
@@ -38,7 +43,7 @@ jobs:
       run: kubectl create secret docker-registry reg-fwcd --docker-server=docker.pkg.github.com --docker-username=fwcd --docker-password=${{ secrets.GITHUB_TOKEN }}
   
     - name: Deploy to cluster
-      run: kubectl apply --kubeconfig /tmp/kubeconfig -f $GITHUB_WORKSPACE/server/devops/deployment.yml
+      run: kubectl apply --kubeconfig /tmp/kubeconfig -f devops/deployment.yml
     
     - name: Delete secret
       run: kubectl delete secret reg-fwcd
