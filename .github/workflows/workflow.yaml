@@ -12,6 +12,8 @@ jobs:
     name: Build and push server image to GitHub packages
     runs-on: ubuntu-latest
     steps:
+    - name: Checkout branch
+      uses: actions/checkout@v2
     - name: Build and push image
       uses: docker/build-push-action@v1
       with:
@@ -27,7 +29,7 @@ jobs:
     name: Deploy server to Kubernetes cluster
     runs-on: ubuntu-latest
     steps:
-    - name: Install KubeCTl
+    - name: Install KubeCTL
       uses: azure/setup-kubectl@v1
   
     - name: Checkout branch
@@ -40,7 +42,7 @@ jobs:
       run: echo ${{ secrets.KUBE_CONFIG_DATA }} | base64 --decode > /tmp/kubeconfig
 
     - name: Create temporary docker registry secret
-      run: kubectl create secret docker-registry reg-fwcd --docker-server=docker.pkg.github.com --docker-username=fwcd --docker-password=${{ secrets.GITHUB_TOKEN }}
+      run: kubectl create --kubeconfig /tmp/kubeconfig secret docker-registry reg-fwcd --docker-server=docker.pkg.github.com --docker-username=fwcd --docker-password=${{ secrets.GITHUB_TOKEN }}
   
     - name: Deploy to cluster
       run: kubectl apply --kubeconfig /tmp/kubeconfig -f devops/deployment.yml
