@@ -11,6 +11,7 @@ jobs:
     - name: Build and push image
       uses: docker/build-push-action@v1
       with:
+        registry: docker.pkg.github.com
         username: fwcd
         password: ${{ secrets.GITHUB_TOKEN }}
         repository: fwcd/ct-server
