@@ -31,7 +31,7 @@ jobs:
       uses: azure/setup-kubectl@v1
 
     - name: Replace image in deployment file
-      run: TAG=$(echo $GITHUB_SHA | head -c7) && sed -i 's|<IMAGE>docker.pkg.github.com/fwcd/iot-contact-tracer/ct-server|:sha-'${TAG}'|' devops/deployment.yml
+      run: TAG=$(echo $GITHUB_SHA | head -c7) && sed -i 's|<IMAGE>|docker.pkg.github.com/fwcd/iot-contact-tracer/ct-server:sha-'${TAG}'|' devops/deployment.yml
 
     - name: Write Kubeconfig to file
       run: echo ${{ secrets.KUBE_CONFIG_DATA }} | base64 --decode > /tmp/kubeconfig
@@ -43,7 +43,7 @@ jobs:
       run: kubectl apply --kubeconfig /tmp/kubeconfig -f devops/deployment.yml
     
     - name: Delete secret
-      run: kubectl delete secret reg-fwcd
+      run: kubectl delete --kubeconfig /tmp/kubeconfig secret reg-fwcd
 
     - name: Verify deployment
       run: kubectl rollout status deployment/ct-server
