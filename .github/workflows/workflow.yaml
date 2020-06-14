@@ -20,7 +20,7 @@ jobs:
       with:
         registry: docker.pkg.github.com
         path: server
-        dockerfile: devops/Dockerfile
+        dockerfile: server/devops/Dockerfile
         repository: fwcd/ct-server
         username: fwcd
         password: ${{ secrets.GITHUB_TOKEN }}
