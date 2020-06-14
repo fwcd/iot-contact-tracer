@@ -16,7 +16,7 @@ jobs:
       uses: docker/build-push-action@v1
       with:
         registry: docker.pkg.github.com
-        dockerfile: devops/Dockerfile
+        dockerfile: server/devops/Dockerfile
         repository: fwcd/ct-server
         username: fwcd
         password: ${{ secrets.GITHUB_TOKEN }}
