@@ -21,7 +21,7 @@ jobs:
         registry: docker.pkg.github.com
         path: server
         dockerfile: server/devops/Dockerfile
-        repository: fwcd/ct-server
+        repository: fwcd/iot-contact-tracer/ct-server
         username: fwcd
         password: ${{ secrets.GITHUB_TOKEN }}
         tags: latest
@@ -31,7 +31,7 @@ jobs:
       uses: azure/setup-kubectl@v1
 
     - name: Replace image in deployment file
-      run: TAG=$(echo $GITHUB_SHA | head -c7) && sed -i 's|<IMAGE>docker.pkg.github.com/fwcd/ct-server|:'${TAG}'|' devops/deployment.yml
+      run: TAG=$(echo $GITHUB_SHA | head -c7) && sed -i 's|<IMAGE>docker.pkg.github.com/fwcd/iot-contact-tracer/ct-server|:sha-'${TAG}'|' devops/deployment.yml
 
     - name: Write Kubeconfig to file
       run: echo ${{ secrets.KUBE_CONFIG_DATA }} | base64 --decode > /tmp/kubeconfig
