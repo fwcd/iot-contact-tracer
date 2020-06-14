@@ -12,6 +12,7 @@ Flask-SQLAlchemy = "*"
 Flask-Env = "*"
 Flask-RESTful = "*"
 SQLAlchemy = "*"
+gunicorn = "*"
 
 [requires]
 python_version = "3.8"
