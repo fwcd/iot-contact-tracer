@@ -46,4 +46,4 @@ jobs:
       run: kubectl delete --kubeconfig /tmp/kubeconfig secret reg-fwcd
 
     - name: Verify deployment
-      run: kubectl rollout status deployment/ct-server
+      run: kubectl rollout --kubeconfig /tmp/kubeconfig status deployment/ct-server

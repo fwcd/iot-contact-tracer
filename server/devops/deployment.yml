@@ -29,6 +29,13 @@ spec:
             cpu: 100m
           limits:
             cpu: 100m
+        livenessProbe:
+            httpGet:
+                path: /api/v1/health
+                port: 5000
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            ---
       imagePullSecrets:
       - name: reg-fwcd
 ---
