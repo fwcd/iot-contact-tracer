@@ -11,6 +11,10 @@
 #define LOG_MODULE "Contact tracer"
 #define LOG_LEVEL LOG_LEVEL_INFO
 
+// A "chance of infection" in percent that is checked each REBROADCAST_TIME.
+// Note that this only applies if the node has encountered other nodes.
+#define EXPOSURE_CHANCE 50
+
 // The interval of seconds at which new identifiers are generated
 #define EXPIRATION_TIME (40 * 60)
 
@@ -37,12 +41,17 @@ struct rolling_identifier {
     uint16_t value[IDENTIFIER_SIZE / 2];
 };
 
+/** A better RNG. */
+uint16_t random_number(void) {
+    return random_rand() ^ (node_id * 100) ^ clock_time();
+}
+
 /** Generates a new identifier (pseudo-)randomly. */
 struct rolling_identifier rolling_identifier_generate(void) {
     struct rolling_identifier ident;
     uint8_t i;
     for (i = 0; i < ARRAY_SIZE(ident.value); i++) {
-        ident.value[i] = random_rand() ^ (i * 1000) ^ (node_id * 100) ^ clock_time();
+        ident.value[i] = random_number() ^ (i * 1000);
     }
     return ident;
 }
@@ -120,6 +129,22 @@ struct rolling_identifier known_identifiers_current(struct known_identifiers *se
     return self->own.identifiers[self->own.last_in];
 }
 
+void report_exposure(struct known_identifiers *known) {
+    LOG_INFO("[REQUEST reportExposure ");
+
+    struct identifier_store *store = &known->others;
+    uint16_t i;
+    uint16_t j;
+    for (i = 0; i < store->size; i++) {
+        struct rolling_identifier ident = store->identifiers[store->next_out + i];
+        for (j = 0; j < ARRAY_SIZE(ident.value); j++) {
+            LOG_OUTPUT("%x", ident.value[j]);
+        }
+    }
+
+    LOG_OUTPUT("]\n");
+}
+
 // == Globals ==
 
 static struct known_identifiers known;
@@ -155,6 +180,7 @@ AUTOSTART_PROCESSES(&contact_tracer_process);
 PROCESS_THREAD(contact_tracer_process, env, data) {
     static struct etimer timer;
     static uint16_t elapsed = EXPIRATION_TIME;
+    static uint8_t is_exposed = 0;
 
     PROCESS_BEGIN();
 
@@ -167,6 +193,12 @@ PROCESS_THREAD(contact_tracer_process, env, data) {
             LOG_INFO("Rolling the current identifier...\n");
             identifier_store_roll(&known.own);
             elapsed = 0;
+        }
+
+        // Get exposed to COVID-19 with a certain chance
+        if (!is_exposed && known.others.size > 0 && (random_number() % 100) < EXPOSURE_CHANCE) {
+            is_exposed = true;
+            report_exposure(&known);
         }
 
         LOG_DBG("Broadcasting identifier...\n");

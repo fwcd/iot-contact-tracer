@@ -8,7 +8,7 @@ def create_handler(url):
             print("Handling new connection...")
             while True:
                 raw = self.rfile.readline().decode("utf-8").strip()
-                req = re.search(r"\[REQUEST\s+(?P<name>\w+)\s*(?P<body>.*)\]")
+                req = re.search(r"\[REQUEST\s+(?P<name>\w+)\s*(?P<body>.*)\]", raw)
                 if req:
                     name = req.group("name")
                     body = req.group("body")
