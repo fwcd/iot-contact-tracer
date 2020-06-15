@@ -24,13 +24,8 @@ spec:
         image: <IMAGE>
         ports:
         - containerPort: 7533
-        resources:
-          requests:
-            cpu: 100m
-          limits:
-            cpu: 100m
       imagePullSecrets:
-      - name: reg-fwcd
+      - name: reg-fwcd-adapter
 ---
 apiVersion: v1
 kind: Service

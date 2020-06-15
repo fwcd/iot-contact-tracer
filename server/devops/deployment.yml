@@ -24,11 +24,6 @@ spec:
         image: <IMAGE>
         ports:
         - containerPort: 5000
-        resources:
-          requests:
-            cpu: 100m
-          limits:
-            cpu: 100m
         livenessProbe:
           httpGet:
             path: /api/v1/health
@@ -36,7 +31,7 @@ spec:
           initialDelaySeconds: 60
           periodSeconds: 10
       imagePullSecrets:
-      - name: reg-fwcd
+      - name: reg-fwcd-server
 ---
 apiVersion: v1
 kind: Service
