@@ -14,5 +14,5 @@ USER app
 
 COPY . .
 
-EXPOSE 5000
-ENTRYPOINT ["python", "cng_adapter", "--url", "http://ct-server:5000"]
+EXPOSE 7533
+ENTRYPOINT ["python", "-m", "cng_adapter", "--url", "http://ct-server:5000"]

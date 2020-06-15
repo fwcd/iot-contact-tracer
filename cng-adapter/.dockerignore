@@ -1,0 +1,4 @@
+devops/
+.dockerignore
+README.md
+requirements.txt
