@@ -2,6 +2,8 @@ on:
   push:
     branches:
       - master
+    paths:
+      - 'server/**'
 
 defaults:
   run:
@@ -37,13 +39,13 @@ jobs:
       run: echo ${{ secrets.KUBE_CONFIG_DATA }} | base64 --decode > /tmp/kubeconfig
 
     - name: Create temporary docker registry secret
-      run: kubectl create --kubeconfig /tmp/kubeconfig secret docker-registry reg-fwcd --docker-server=https://docker.pkg.github.com --docker-username=fwcd --docker-password=${{ secrets.GITHUB_TOKEN }}
+      run: kubectl create --kubeconfig /tmp/kubeconfig secret docker-registry reg-fwcd-server --docker-server=https://docker.pkg.github.com --docker-username=fwcd --docker-password=${{ secrets.GITHUB_TOKEN }}
   
     - name: Deploy to cluster
       run: kubectl apply --kubeconfig /tmp/kubeconfig -f devops/deployment.yml
     
     - name: Delete secret
-      run: kubectl delete --kubeconfig /tmp/kubeconfig secret reg-fwcd
+      run: kubectl delete --kubeconfig /tmp/kubeconfig secret reg-fwcd-server
 
     - name: Verify deployment
       run: kubectl rollout --kubeconfig /tmp/kubeconfig status deployment/ct-server
