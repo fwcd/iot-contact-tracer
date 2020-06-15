@@ -4,6 +4,7 @@ on:
       - master
     paths:
       - 'server/**'
+      - '.github/workflows/server.yaml'
 
 defaults:
   run:

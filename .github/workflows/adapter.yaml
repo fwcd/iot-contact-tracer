@@ -4,6 +4,7 @@ on:
       - master
     paths:
       - 'cng-adapter/**'
+      - '.github/workflows/adapter.yaml'
 
 defaults:
   run:
