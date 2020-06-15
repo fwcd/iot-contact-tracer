@@ -1,0 +1,49 @@
+on:
+  push:
+    branches:
+      - master
+
+defaults:
+  run:
+    working-directory: cng-adapter
+
+jobs: 
+  deploy:
+    name: Build and push adapter image to GitHub packages
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout branch
+      uses: actions/checkout@v2
+
+    - name: Build and push image
+      uses: docker/build-push-action@v1
+      with:
+        registry: docker.pkg.github.com
+        path: cng-adapter
+        dockerfile: cng-adapter/devops/Dockerfile
+        repository: fwcd/iot-contact-tracer/cng-adapter
+        username: fwcd
+        password: ${{ secrets.GITHUB_TOKEN }}
+        tags: latest
+        tag_with_sha: true
+
+    - name: Install KubeCTL
+      uses: azure/setup-kubectl@v1
+
+    - name: Replace image in deployment file
+      run: TAG=$(echo $GITHUB_SHA | head -c7) && sed -i 's|<IMAGE>|docker.pkg.github.com/fwcd/iot-contact-tracer/cng-adapter:sha-'${TAG}'|' devops/deployment.yml
+
+    - name: Write Kubeconfig to file
+      run: echo ${{ secrets.KUBE_CONFIG_DATA }} | base64 --decode > /tmp/kubeconfig
+
+    - name: Create temporary docker registry secret
+      run: kubectl create --kubeconfig /tmp/kubeconfig secret docker-registry reg-fwcd --docker-server=https://docker.pkg.github.com --docker-username=fwcd --docker-password=${{ secrets.GITHUB_TOKEN }}
+  
+    - name: Deploy to cluster
+      run: kubectl apply --kubeconfig /tmp/kubeconfig -f devops/deployment.yml
+    
+    - name: Delete secret
+      run: kubectl delete --kubeconfig /tmp/kubeconfig secret reg-fwcd
+
+    - name: Verify deployment
+      run: kubectl rollout --kubeconfig /tmp/kubeconfig status deployment/cng-adapter

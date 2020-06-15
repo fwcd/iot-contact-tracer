@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cng-adapter
+  labels:
+    app: cng-adapter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cng-adapter
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  minReadySeconds: 5
+  template:
+    metadata:
+      labels:
+        app: cng-adapter
+    spec:
+      containers:
+      - name: cng-adapter
+        image: <IMAGE>
+        ports:
+        - containerPort: 7533
+        resources:
+          requests:
+            cpu: 100m
+          limits:
+            cpu: 100m
+      imagePullSecrets:
+      - name: reg-fwcd
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cng-adapter
+spec:
+  selector:
+    app: cng-adapter
+  ports:
+    - protocol: TCP
+      port: 7533
+      targetPort: 7533
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tcp-services
+  namespace: ingress-nginx
+data:
+  7533: "default/cng-adapter:7533"
