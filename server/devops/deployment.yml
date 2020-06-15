@@ -38,6 +38,18 @@ spec:
       imagePullSecrets:
       - name: reg-fwcd
 ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ct-server
+spec:
+  selector:
+    app: ct-server
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5000
+---
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
