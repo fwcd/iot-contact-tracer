@@ -54,7 +54,8 @@ metadata:
     kubernetes.io/ingress.class: "nginx"
 spec:
   rules:
-  - http:
+  - host: contact-tracer.xyz
+    http:
       paths:
       - path: /
         backend:
