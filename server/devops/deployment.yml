@@ -1,50 +1,3 @@
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: ct-server
-  labels:
-    app: ct-server
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: ct-server
-  strategy:
-    rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 1
-  minReadySeconds: 5
-  template:
-    metadata:
-      labels:
-        app: ct-server
-    spec:
-      containers:
-      - name: ct-server
-        image: <IMAGE>
-        ports:
-        - containerPort: 5000
-        livenessProbe:
-          httpGet:
-            path: /api/v1/health
-            port: 5000
-          initialDelaySeconds: 60
-          periodSeconds: 10
-      imagePullSecrets:
-      - name: reg-fwcd-server
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: ct-server
-spec:
-  selector:
-    app: ct-server
-  ports:
-    - protocol: TCP
-      port: 80
-      targetPort: 5000
----
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
@@ -52,7 +5,12 @@ metadata:
   annotations:
     # use the shared ingress-nginx
     kubernetes.io/ingress.class: "nginx"
+    cert-manager.io/issuer: "letsencrypt-prod"
 spec:
+  tls:
+  - hosts:
+    - contact-tracer.xyz
+    secretName: contact-tracer-xyz-tls
   rules:
   - host: contact-tracer.xyz
     http:
