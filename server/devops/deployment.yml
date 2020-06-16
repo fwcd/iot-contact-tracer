@@ -22,6 +22,12 @@ spec:
       containers:
       - name: ct-server
         image: <IMAGE>
+        env:
+        - name: SQLALCHEMY_DATABASE_URI
+          valueFrom:
+            secretKeyRef:
+              name: server-db-uri
+              key: uri
         ports:
         - containerPort: 5000
         livenessProbe:
