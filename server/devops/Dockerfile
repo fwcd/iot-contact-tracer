@@ -1,4 +1,4 @@
-FROM python:3.8-alpine
+FROM python:3.8-slim
 
 RUN pip install pipenv
 
@@ -9,7 +9,7 @@ COPY Pipfile Pipfile.lock ./
 
 RUN set -ex && pipenv install --deploy --system
 
-RUN addgroup -S app && adduser -S -G app app
+RUN groupadd -r app && useradd -r -g app app
 USER app
 
 COPY . .
