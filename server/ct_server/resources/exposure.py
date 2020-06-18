@@ -35,7 +35,8 @@ class ExposureListResource(Resource):
 class HealthCheckResource(Resource):
     def get(self):
         try:
-            db.session.query("1").from_statement(text("SELECT 1")).all()
+            Exposure.query.all()
             return "Healthy", 200, {}
-        except SQLAlchemyError:
+        except SQLAlchemyError as e:
+            print(f"DB connection failed: {e}")
             return "DB connection lost", 500, {}
