@@ -4,7 +4,7 @@ A decentralized contact tracing system, inspired by [DP-3T](https://github.com/D
 * `server`: A server storing exposed identifiers
 * `cng-client`: An embedded client based on the [Contiki-NG](https://github.com/contiki-ng/contiki-ng) os
 * `cng-adapter`: An adapter that mediates between the embedded client and the server
-* A mobile client for Android/iOS (TBD)
+* `mobile-client`: A mobile client for Android/iOS, using Flutter
 
 ![Simulation](cooja-simulation.png)
 > Cooja Simulation of the Contiki-NG client nodes
