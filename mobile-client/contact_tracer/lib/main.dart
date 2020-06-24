@@ -1,5 +1,7 @@
 import 'package:contact_tracer/feed_card.dart';
+import 'package:contact_tracer/number_list_tile.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 void main() {
   runApp(ContactTracerApp());
@@ -38,6 +40,8 @@ class ContactTracerHomePage extends StatefulWidget {
 
 class _ContactTracerHomePageState extends State<ContactTracerHomePage> {
   bool _healthy = false;
+  bool _enabled = false;
+  double _broadcastInterval = 10;
 
   void _toggleExposed() {
     setState(() {
@@ -69,7 +73,38 @@ class _ContactTracerHomePageState extends State<ContactTracerHomePage> {
             )
           ),
           FeedCard(
-            child: Text('Test')
+            child: Text(
+              'The IoT contact tracer is an app that helps you stay stafe during the COVID-19 pandemic by detecting possible exposures through decentralized contact tracing.',
+              style: TextStyle(
+                color: Colors.grey[800]
+              )
+            )
+          ),
+          FeedCard(
+            child: Column(
+              children: <Widget>[
+                SwitchListTile(
+                  value: _enabled,
+                  title: Text('Enable Contact Tracing'),
+                  subtitle: Text('Periodically broadcast identifiers to nearby devices.'),
+                  onChanged: (value) {
+                    setState(() {
+                      _enabled = value;
+                    });
+                  },
+                ),
+                NumberListTile(
+                  title: Text('Broadcast Interval'),
+                  subtitle: Text('in seconds'),
+                  value: _broadcastInterval,
+                  onChanged: (value) {
+                    setState(() {
+                      _broadcastInterval = value;
+                    });
+                  },
+                )
+              ],
+            )
           )
         ],
       ),
