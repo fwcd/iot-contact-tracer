@@ -21,28 +21,37 @@ class ContactTracerApp extends StatelessWidget {
         // closer together (more dense) than on mobile platforms.
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: ContactTracerHomePage(title: 'IoT Contact Tracer'),
+      home: ContactTracerHomePage(
+        title: 'IoT Contact Tracer',
+        backendUrl: 'https://contact-tracer.xyz',
+      ),
     );
   }
 }
 
 class ContactTracerHomePage extends StatefulWidget {
-  ContactTracerHomePage({Key key, this.title}) : super(key: key);
+  final String backendUrl;
+  final String title;
+
+  ContactTracerHomePage({Key key, this.backendUrl, this.title}) : super(key: key);
 
   // Home page of the application.
   // Fields are always final in a widget subclass.
 
-  final String title;
-
   @override
-  _ContactTracerHomePageState createState() => _ContactTracerHomePageState();
+  _ContactTracerHomePageState createState() => _ContactTracerHomePageState(
+    backendUrl: backendUrl
+  );
 }
 
 class _ContactTracerHomePageState extends State<ContactTracerHomePage> {
-  bool _healthy = false;
+  String backendUrl;
+  bool _healthy = true;
   bool _enabled = false;
   double _broadcastIntervalSec = 10;
   double _rollIntervalSec = 10;
+
+  _ContactTracerHomePageState({this.backendUrl}) : super();
 
   void _queryHealth(BuildContext context) async {
     var response = await http.get('https://contact-tracer.xyz/api/v1/health');
@@ -149,7 +158,7 @@ class _ContactTracerHomePageState extends State<ContactTracerHomePage> {
           height: 40.0,
           child: Padding(
             padding: EdgeInsets.all(12.0),
-            child: Text('Test')
+            child: Text('Backend: $backendUrl')
           )
         )
       ),
