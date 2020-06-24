@@ -95,9 +95,8 @@ class _ContactTracerHomePageState extends State<ContactTracerHomePage> {
                 ),
                 NumberListTile(
                   title: Text('Broadcast Interval'),
-                  subtitle: Text('in seconds'),
                   value: _broadcastInterval,
-                  onChanged: (value) {
+                  onEditingComplete: (value) {
                     setState(() {
                       _broadcastInterval = value;
                     });

@@ -4,27 +4,26 @@ class NumberListTile extends StatelessWidget {
   final Widget title;
   final Widget subtitle;
   final double value;
-  final Function(double value) onChanged;
+  final Function(double value) onEditingComplete;
 
-  NumberListTile({Key key, this.title, this.subtitle, this.value, this.onChanged}) : super(key: key);
-
-  // TODO: Currently not working due to
-  // https://github.com/flutter/flutter/issues/40024
+  NumberListTile({Key key, this.title, this.subtitle, this.value, this.onEditingComplete}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    var controller = TextEditingController(
+      text: "$value",
+    );
     return ListTile(
       title: title,
       subtitle: subtitle,
       trailing: Container(
         width: 80.0,
         child: TextField(
-          controller: TextEditingController(
-            text: "$value"
-          ),
+          controller: controller,
           keyboardType: TextInputType.number,
-          onChanged: (text) {
-            onChanged(double.parse(text));
+          onEditingComplete: () {
+            onEditingComplete(double.parse(controller.text));
+            FocusScope.of(context).unfocus();
           }
         )
       )
