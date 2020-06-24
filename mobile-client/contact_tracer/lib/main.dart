@@ -56,7 +56,7 @@ class _ContactTracerHomePageState extends State<ContactTracerHomePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: Column(
+      body: ListView(
         children: <Widget>[
           FeedCard(
             color: _healthy ? Colors.green[700] : Colors.red,
