@@ -12,7 +12,7 @@ class ContactTracerApp extends StatelessWidget {
             title: 'IoT Contact Tracer',
             theme: ThemeData(
                 // Primary application theme
-                primarySwatch: Colors.green,
+                primarySwatch: Colors.blueGrey,
                 // This makes the visual density adapt to the platform that you run
                 // the app on. For desktop platforms, the controls will be smaller and
                 // closer together (more dense) than on mobile platforms.
@@ -36,11 +36,11 @@ class ContactTracerHomePage extends StatefulWidget {
 }
 
 class _ContactTracerHomePageState extends State<ContactTracerHomePage> {
-    int _counter = 0;
+    bool _healthy = false;
 
-    void _incrementCounter() {
+    void _toggleExposed() {
         setState(() {
-            _counter++;
+            _healthy = !_healthy;
         });
     }
 
@@ -50,22 +50,35 @@ class _ContactTracerHomePageState extends State<ContactTracerHomePage> {
             appBar: AppBar(
                 title: Text(widget.title),
             ),
-            body: Center(
-                child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                        Text('You have pressed the button this many times:'),
-                        Text(
-                            '$_counter',
-                            style: Theme.of(context).textTheme.headline4,
-                        ),
-                    ],
-                ),
+            body: Column(
+                children: <Widget>[
+                    Card(
+                        color: _healthy ? Colors.green[700] : Colors.red,
+                        child: SizedBox(
+                            width: double.infinity,
+                            child: Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: Column(
+                                    children: <Widget>[
+                                        Text(
+                                            _healthy ? "Healthy" : "Exposed",
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 25.0,
+                                                fontWeight: FontWeight.bold
+                                            )
+                                        ),
+                                    ],
+                                )
+                            )
+                        )
+                    )
+                ],
             ),
             floatingActionButton: FloatingActionButton(
-                onPressed: _incrementCounter,
-                tooltip: 'Increment',
-                child: Icon(Icons.add),
+                onPressed: _toggleExposed,
+                tooltip: 'Set Exposed',
+                child: Icon(Icons.error),
             ),
         );
     }
