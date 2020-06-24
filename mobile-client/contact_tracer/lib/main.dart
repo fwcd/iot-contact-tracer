@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'home_page.dart';
+import 'view/home_page.dart';
 
 void main() {
   runApp(ContactTracerApp());
