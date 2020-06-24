@@ -1,6 +1,7 @@
 import 'package:contact_tracer/feed_card.dart';
 import 'package:contact_tracer/number_list_tile.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 void main() {
   runApp(ContactTracerApp());
@@ -43,9 +44,27 @@ class _ContactTracerHomePageState extends State<ContactTracerHomePage> {
   double _broadcastIntervalSec = 10;
   double _rollIntervalSec = 10;
 
-  void _toggleExposed() {
+  void _queryHealth(BuildContext context) async {
+    var response = await http.get('https://contact-tracer.xyz/api/v1/health');
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Got HTTP ${response.statusCode}'),
+          content: Text(response.body),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('Ok'),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            )
+          ],
+        );
+      }
+    );
     setState(() {
-      _healthy = !_healthy;
+      _healthy = response.statusCode == 200;
     });
   }
 
@@ -119,9 +138,9 @@ class _ContactTracerHomePageState extends State<ContactTracerHomePage> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _toggleExposed,
-        tooltip: 'Set Exposed',
-        child: Icon(Icons.error),
+        onPressed: () { _queryHealth(context); },
+        tooltip: 'Check Health',
+        child: Icon(Icons.healing),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       bottomNavigationBar: BottomAppBar(
