@@ -1,8 +1,8 @@
+import 'package:contact_tracer/model/health_status.dart';
+import 'package:contact_tracer/view/feed_card.dart';
+import 'package:contact_tracer/view/number_list_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-
-import 'feed_card.dart';
-import 'number_list_tile.dart';
 
 class ContactTracerHomePage extends StatefulWidget {
   final String backendUrl;
@@ -21,7 +21,7 @@ class ContactTracerHomePage extends StatefulWidget {
 
 class _ContactTracerHomePageState extends State<ContactTracerHomePage> {
   String backendUrl;
-  bool _healthy = true;
+  HealthStatus _health = HealthStatus.unknown;
   bool _enabled = false;
   double _broadcastIntervalSec = 10;
   double _rollIntervalSec = 10;
@@ -48,12 +48,26 @@ class _ContactTracerHomePageState extends State<ContactTracerHomePage> {
       }
     );
     setState(() {
-      _healthy = response.statusCode == 200;
+      _health = response.statusCode == 200 ? HealthStatus.healthy : HealthStatus.exposed;
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    Color healthColor;
+
+    switch (_health) {
+      case HealthStatus.healthy:
+        healthColor = Colors.green[700];
+        break;
+      case HealthStatus.exposed:
+        healthColor = Colors.red;
+        break;
+      default:
+        healthColor = Colors.grey;
+        break;
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -61,11 +75,11 @@ class _ContactTracerHomePageState extends State<ContactTracerHomePage> {
       body: ListView(
         children: <Widget>[
           FeedCard(
-            color: _healthy ? Colors.green[700] : Colors.red,
+            color: healthColor,
             child: Column(
               children: <Widget>[
                 Text(
-                  _healthy ? 'Healthy' : 'Exposed',
+                  _health.label,
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 25.0,
