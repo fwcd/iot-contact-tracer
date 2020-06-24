@@ -1,7 +1,6 @@
 import 'package:contact_tracer/feed_card.dart';
 import 'package:contact_tracer/number_list_tile.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 void main() {
   runApp(ContactTracerApp());
@@ -123,6 +122,17 @@ class _ContactTracerHomePageState extends State<ContactTracerHomePage> {
         onPressed: _toggleExposed,
         tooltip: 'Set Exposed',
         child: Icon(Icons.error),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+      bottomNavigationBar: BottomAppBar(
+        shape: CircularNotchedRectangle(),
+        child: Container(
+          height: 40.0,
+          child: Padding(
+            padding: EdgeInsets.all(12.0),
+            child: Text('Test')
+          )
+        )
       ),
     );
   }

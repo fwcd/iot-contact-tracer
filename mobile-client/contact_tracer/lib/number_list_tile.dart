@@ -11,7 +11,7 @@ class NumberListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var controller = TextEditingController(
-      text: "$value",
+      text: '$value',
     );
     return ListTile(
       title: title,
