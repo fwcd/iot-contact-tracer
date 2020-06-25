@@ -14,9 +14,12 @@ def create_handler(url):
                     body = req.group("body")
                     if name == "reportExposure":
                         # TODO: Perform validation of the body
-                        rsp = requests.put(f"{url}/api/v1/exposures/{body}")
-                        rsp.raise_for_status()
-                        print(f"Reported exposure {body}: {rsp.content}")
+                        for raw_exposure in body.split(" "):
+                            exposure = raw_exposure.strip()
+                            if exposure:
+                                rsp = requests.put(f"{url}/api/v1/exposures/{exposure}")
+                                rsp.raise_for_status()
+                                print(f"Reported exposure {exposure}: {rsp.content}")
                     else:
                         print(f"Unsupported request name: {name}")
                 else:

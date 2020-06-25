@@ -140,6 +140,7 @@ void report_exposure(struct known_identifiers *known) {
         for (j = 0; j < ARRAY_SIZE(ident.value); j++) {
             LOG_OUTPUT("%x", ident.value[j]);
         }
+        LOG_OUTPUT(" ");
     }
 
     LOG_OUTPUT("]\n");

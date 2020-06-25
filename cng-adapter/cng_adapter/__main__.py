@@ -14,11 +14,7 @@ def main():
 
     with CNGAdapterTCPServer(("localhost", port), create_handler(url)) as server:
         print(f"Listening on port {port} for TCP connections...")
-        try:
-            server.serve_forever()
-        except KeyboardInterrupt:
-            print("Shutting down...")
-            pass
+        server.serve_forever()
 
 if __name__ == "__main__":
     main()
