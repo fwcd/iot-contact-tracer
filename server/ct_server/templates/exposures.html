@@ -11,7 +11,18 @@
 <div class="container mt-5">
     <h1 class="text-center">IoT Contact Tracer</h1>
     
-    <table class="table mt-3">
+    <div id=flashes>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+    {% endwith %}
+    </div>
+
+    <h2 class="mt-3">Exposures</h2>
+    <table class="table">
         <thead>
             <th scope="col">#</th>
             <th scope="col">ID</th>
@@ -29,6 +40,41 @@
     </table>
     {{ pagination.info }}
     {{ pagination.links }}
+
+    <h2 class="mt-5">Add Exposure</h2>
+    <form>
+        <div class="row">
+            <div class="col">
+                <input type="text" class="form-control" id="exposureID" placeholder="ID">
+            </div>
+            <a href="#" class="btn btn-primary col-1" id="submit" role="button">Submit</a>
+        </div>
+    </form>
 </div>
 </body>
+<script>
+    document.getElementById("submit").onclick = async function () {
+        let exposureID = document.getElementById("exposureID").value;
+        let url = "{{ url_for('api.exposurelistresource') }}" + "/" + exposureID;
+
+        let requestOptions = {
+            method: 'PUT',
+            redirect: 'follow'
+        };
+
+        let response = await fetch(url, requestOptions);
+
+        if (response.status === 201) {
+            window.location.reload();
+        } else {
+            console.log("Failed to create exposure entry!");
+
+            let flash = document.createElement("div");
+            flash.classList.add("alert");
+            flash.classList.add("alert-danger");
+            flash.innerText = "Failed to create exposure entry!";
+            document.getElementById("flashes").append(flash);
+        }
+    }
+</script>
 </html>
