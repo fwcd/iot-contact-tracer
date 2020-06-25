@@ -24,12 +24,25 @@ class ExposureResource(Resource):
         db.session.commit()
 
         return "Created", 201, {}
+    
+    def delete(self, id):
+        n = Exposure.query.filter_by(id=id).delete()
+        db.session.commit()
+        if n == 0:
+            return "ID not found", 404, {}
+        else:
+            return f"Deleted exposure with ID {id}", 200, {}
 
 
 class ExposureListResource(Resource):
     @marshal_with(exposure_marshaller)
     def get(self):
         return Exposure.query.all()
+    
+    def delete(self):
+        n = Exposure.query.delete()
+        db.session.commit()
+        return f"Deleted {n} exposure(s)", 200, {}
 
 
 class HealthCheckResource(Resource):
