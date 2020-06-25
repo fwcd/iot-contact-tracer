@@ -130,10 +130,9 @@ struct rolling_identifier known_identifiers_current(struct known_identifiers *se
     return self->own.identifiers[self->own.last_in];
 }
 
-void request(const char *req, struct known_identifiers *known) {
+void request(const char *req, struct identifier_store *store) {
     LOG_INFO("[REQUEST %s ", req);
 
-    struct identifier_store *store = &known->others;
     uint16_t i;
     uint16_t j;
     for (i = 0; i < store->size; i++) {
@@ -148,11 +147,11 @@ void request(const char *req, struct known_identifiers *known) {
 }
 
 void report_exposure(struct known_identifiers *known) {
-    request("reportExposure", known);
+    request("reportExposure", &known->own);
 }
 
 void check_health(struct known_identifiers *known) {
-    request("checkHealth", known);
+    request("checkHealth", &known->others);
 }
 
 // == Globals ==
