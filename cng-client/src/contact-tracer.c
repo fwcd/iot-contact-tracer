@@ -225,24 +225,28 @@ PROCESS_THREAD(contact_tracer_process, ev, data) {
         LOG_DBG("Broadcasting identifier...\n");
         broadcast(known_identifiers_current(&known));
 
-        PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer));
-        etimer_reset(&timer);
-        elapsed += REBROADCAST_TIME;
+        while (true) {
+            PROCESS_YIELD();
 
-        // Handle health check response
-        if (ev == serial_line_event_message) {
-            const char *response = (char *) data;
-            LOG_INFO("Got '%%'\n", response);
-            switch (response[0]) {
-            case 'E':
-                LOG_DBG("Exposed!\n");
-                set_exposed();
-                break;
-            case 'H':
-                LOG_DBG("Healthy!\n");
-                break;
-            default:
-                LOG_WARN("Unrecognized response %s!\n", response);
+            // Handle health check response
+            if (ev == serial_line_event_message) {
+                const char *response = (char *) data;
+                LOG_DBG("Got '%s'\n", response);
+                switch (response[0]) {
+                case 'E':
+                    LOG_DBG("Exposed!\n");
+                    set_exposed();
+                    break;
+                case 'H':
+                    LOG_DBG("Healthy!\n");
+                    break;
+                default:
+                    LOG_WARN("Unrecognized response %s!\n", response);
+                    break;
+                }
+            } else if (etimer_expired(&timer)) {
+                etimer_reset(&timer);
+                elapsed += REBROADCAST_TIME;
                 break;
             }
         }

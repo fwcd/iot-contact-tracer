@@ -5,7 +5,7 @@ from socketserver import StreamRequestHandler
 def create_handler(url):
     class CNGAdapterTCPHandler(StreamRequestHandler):
         def handle(self):
-            print("Handling new connection...")
+            print(f"Handling new connection from {self.client_address}...")
             for line in self.rfile:
                 raw = line.strip().decode("utf-8")
                 req = re.search(r"\[REQUEST\s+(?P<name>\w+)\s*(?P<body>.*)\]", raw)
@@ -25,12 +25,14 @@ def create_handler(url):
                         exposures = {e["id"] for e in rsp.json()}
 
                         if set(idents).intersection(exposures):
+                            print(f"{self.client_address} is exposed!")
                             self.wfile.write(f"E{' '.join(exposures)}\n".encode("utf-8"))
                         else:
-                            self.wfile.write("H".encode("utf-8"))
+                            print(f"{self.client_address} is healthy!")
+                            self.wfile.write("H\n".encode("utf-8"))
                     else:
                         print(f"Unsupported request name: {name}")
                 # else:
                 #     print(f"Got: {raw}")
-            print("Disconnecting")
+            print(f"Disconnected from {self.client_address}")
     return CNGAdapterTCPHandler
