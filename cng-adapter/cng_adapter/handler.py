@@ -26,7 +26,7 @@ def create_handler(url):
 
                         if set(idents).intersection(exposures):
                             print(f"{self.client_address} is exposed!")
-                            self.wfile.write(f"E{' '.join(exposures)}\n".encode("utf-8"))
+                            self.wfile.write(f"E\n".encode("utf-8"))
                         else:
                             print(f"{self.client_address} is healthy!")
                             self.wfile.write("H\n".encode("utf-8"))

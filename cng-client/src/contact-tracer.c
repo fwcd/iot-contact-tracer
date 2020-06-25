@@ -231,14 +231,11 @@ PROCESS_THREAD(contact_tracer_process, ev, data) {
             // Handle health check response
             if (ev == serial_line_event_message) {
                 const char *response = (char *) data;
-                LOG_DBG("Got '%s'\n", response);
+                LOG_INFO("Got '%s'\n", response);
                 switch (response[0]) {
                 case 'E':
                     LOG_DBG("Exposed!\n");
                     set_exposed();
-                    break;
-                case 'H':
-                    LOG_DBG("Healthy!\n");
                     break;
                 default:
                     LOG_WARN("Unrecognized response %s!\n", response);
