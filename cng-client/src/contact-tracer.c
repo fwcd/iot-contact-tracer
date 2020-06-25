@@ -3,6 +3,7 @@
 #include <string.h>
 #include <clock.h>
 #include <dev/leds.h>
+#include <dev/serial-line.h>
 #include <net/nullnet/nullnet.h>
 #include <net/netstack.h>
 #include <sys/node-id.h>
@@ -129,8 +130,8 @@ struct rolling_identifier known_identifiers_current(struct known_identifiers *se
     return self->own.identifiers[self->own.last_in];
 }
 
-void report_exposure(struct known_identifiers *known) {
-    LOG_INFO("[REQUEST reportExposure ");
+void request(const char *req, struct known_identifiers *known) {
+    LOG_INFO("[REQUEST %s ", req);
 
     struct identifier_store *store = &known->others;
     uint16_t i;
@@ -146,9 +147,26 @@ void report_exposure(struct known_identifiers *known) {
     LOG_OUTPUT("]\n");
 }
 
+void report_exposure(struct known_identifiers *known) {
+    request("reportExposure", known);
+}
+
+void check_health(struct known_identifiers *known) {
+    request("checkHealth", known);
+}
+
 // == Globals ==
 
 static struct known_identifiers known;
+static uint8_t is_exposed = 0;
+
+void set_exposed(void) {
+    if (!is_exposed) {
+        is_exposed = 1;
+        // TODO: Toggle LED
+        report_exposure(&known);
+    }
+}
 
 // == Networking ==
 
@@ -178,10 +196,9 @@ void receive(const void *data, uint16_t len, const linkaddr_t *src, const linkad
 PROCESS(contact_tracer_process, "Contact tracer process");
 AUTOSTART_PROCESSES(&contact_tracer_process);
 
-PROCESS_THREAD(contact_tracer_process, env, data) {
+PROCESS_THREAD(contact_tracer_process, ev, data) {
     static struct etimer timer;
     static uint16_t elapsed = EXPIRATION_TIME;
-    static uint8_t is_exposed = 0;
 
     PROCESS_BEGIN();
 
@@ -198,8 +215,9 @@ PROCESS_THREAD(contact_tracer_process, env, data) {
 
         // Get exposed to COVID-19 with a certain chance
         if (!is_exposed && known.others.size > 0 && (random_number() % 100) < EXPOSURE_CHANCE) {
-            is_exposed = true;
-            report_exposure(&known);
+            set_exposed();
+        } else {
+            check_health(&known);
         }
 
         LOG_DBG("Broadcasting identifier...\n");
@@ -208,6 +226,23 @@ PROCESS_THREAD(contact_tracer_process, env, data) {
         PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer));
         etimer_reset(&timer);
         elapsed += REBROADCAST_TIME;
+
+        // Handle health check response
+        if (ev == serial_line_event_message) {
+            const char *response = (char *) data;
+            switch (response[0]) {
+            case 'E':
+                LOG_DBG("Exposed!\n");
+                set_exposed();
+                break;
+            case 'H':
+                LOG_DBG("Healthy!\n");
+                break;
+            default:
+                LOG_WARN("Unrecognized response %s!\n", response);
+                break;
+            }
+        }
     }
 
     PROCESS_END();

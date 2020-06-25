@@ -12,14 +12,22 @@ def create_handler(url):
                 if req:
                     name = req.group("name")
                     body = req.group("body")
+                    idents = [i.strip() for i in body.split(" ") if i.strip()]
+
                     if name == "reportExposure":
-                        # TODO: Perform validation of the body
-                        for raw_exposure in body.split(" "):
-                            exposure = raw_exposure.strip()
-                            if exposure:
-                                rsp = requests.put(f"{url}/api/v1/exposures/{exposure}")
-                                rsp.raise_for_status()
-                                print(f"Reported exposure {exposure}: {rsp.content}")
+                        for ident in idents:
+                            rsp = requests.put(f"{url}/api/v1/exposures/{ident}")
+                            rsp.raise_for_status()
+                            print(f"Reported exposure {ident}: {rsp.content}")
+                    elif name == "checkHealth":
+                        rsp = requests.get(f"{url}/api/v1/exposures")
+                        rsp.raise_for_status()
+                        exposures = {e["id"] for e in rsp.json()}
+
+                        if set(idents).intersection(exposures):
+                            self.wfile.write(f"E{' '.join(exposures)}\n".encode("utf-8"))
+                        else:
+                            self.wfile.write("H".encode("utf-8"))
                     else:
                         print(f"Unsupported request name: {name}")
                 else:
