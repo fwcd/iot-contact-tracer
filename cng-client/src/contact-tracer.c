@@ -161,6 +161,7 @@ static uint8_t is_exposed = 0;
 
 void set_exposed(void) {
     if (!is_exposed) {
+        LOG_WARN("Exposed to COVID-19 after having generated %d identifiers!\n", known.own.size);
         is_exposed = 1;
         leds_set(LEDS_RED);
         report_exposure(&known);
@@ -205,17 +206,19 @@ PROCESS_THREAD(contact_tracer_process, ev, data) {
     nullnet_set_input_callback(receive);
     etimer_set(&timer, REBROADCAST_TIME * CLOCK_SECOND);
 
-    while (true) {
-        if (elapsed >= EXPIRATION_TIME) {
-            LOG_INFO("Rolling the current identifier...\n");
-            identifier_store_roll(&known.own);
-            elapsed = 0;
-        }
+    if (node_id == 1) {
+        identifier_store_roll(&known.own);
+        set_exposed();
+    }
 
-        // Get exposed to COVID-19 with a certain chance
-        if (!is_exposed && known.others.size > 0 && (random_number() % 100) < EXPOSURE_CHANCE) {
-            set_exposed();
-        } else {
+    while (true) {
+        if (!is_exposed) {
+            if (elapsed >= EXPIRATION_TIME) {
+                LOG_INFO("Rolling the current identifier...\n");
+                identifier_store_roll(&known.own);
+                elapsed = 0;
+            }
+
             check_health(&known);
         }
 
