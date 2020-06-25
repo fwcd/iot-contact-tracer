@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>IoT Contact Tracer</title>
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.min.css') }}">
+    <script type="text/javascript" src="{{ url_for('static', filename='bootstrap.bundle.min.js') }}"></script>
+</head>
+<body>
+<div class="container mt-5">
+    <h1 class="text-center">IoT Contact Tracer</h1>
+    
+    <table class="table mt-3">
+        <thead>
+            <th scope="col">#</th>
+            <th scope="col">ID</th>
+            <th scope="col">Timestamp</th>
+        </thead>
+        <tbody>
+            {% for exposure in expo_list.items %}
+            <tr>
+                <th>{{ loop.index + pagination.skip }}</th>
+                <th>{{ exposure.id }}</th>
+                <th>{{ exposure.timestamp }}</th>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {{ pagination.info }}
+    {{ pagination.links }}
+</div>
+</body>
+</html>

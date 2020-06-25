@@ -5,6 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 import ct_server.blueprints.api as api
 import ct_server.blueprints.hello as hello
+from ct_server.blueprints.frontend import exposures
 from ct_server.models import db
 
 class Configuration(metaclass=MetaFlaskEnv):
@@ -16,6 +17,7 @@ def create_app():
 
     app.register_blueprint(api.create_blueprint())
     app.register_blueprint(hello.create_blueprint())
+    app.register_blueprint(exposures)
 
     try:
         os.makedirs(app.instance_path)

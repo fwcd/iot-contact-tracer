@@ -14,6 +14,7 @@ Flask-RESTful = "*"
 SQLAlchemy = "*"
 gunicorn = "*"
 psycopg2-binary = "*"
+flask-paginate = "*"
 
 [requires]
 python_version = "3.8"
