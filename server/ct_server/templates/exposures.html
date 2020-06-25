@@ -22,18 +22,20 @@
     </div>
 
     <h2 class="mt-3">Exposures</h2>
-    <table class="table">
+    <table class="table" id="exposureTable">
         <thead>
             <th scope="col">#</th>
             <th scope="col">ID</th>
             <th scope="col">Timestamp</th>
+            <th></th>
         </thead>
         <tbody>
             {% for exposure in expo_list.items %}
             <tr>
                 <th>{{ loop.index + pagination.skip }}</th>
-                <th>{{ exposure.id }}</th>
-                <th>{{ exposure.timestamp }}</th>
+                <th class="exposureID">{{ exposure.id }}</th>
+                <th class="timestamp">{{ exposure.timestamp }}</th>
+                <th><a href="#" role="button" class="btn btn-danger">X</a></th>
             </tr>
             {% endfor %}
         </tbody>
@@ -58,8 +60,8 @@
         let url = "{{ url_for('api.exposurelistresource') }}" + "/" + exposureID;
 
         let requestOptions = {
-            method: 'PUT',
-            redirect: 'follow'
+            method: "PUT",
+            redirect: "follow"
         };
 
         let response = await fetch(url, requestOptions);
@@ -76,5 +78,31 @@
             document.getElementById("flashes").append(flash);
         }
     }
+
+    document.getElementById("exposureTable").addEventListener("click", async function (e) {
+        if (e.target.className !== "btn btn-danger")
+            return;
+
+        let exposureID = e.target.parentNode.parentNode.getElementsByClassName("exposureID")[0].innerText;
+        let url = "{{ url_for('api.exposurelistresource') }}" + "/" + exposureID;
+
+        let requestOptions = {
+            method: "DELETE",
+            redirect: "follow"
+        };
+
+        let response = await fetch(url, requestOptions);
+
+        if (response.status === 200) {
+            window.location.reload();
+        } else {
+            console.log("Failed to delete exposure entry!");
+
+            let flash = document.createElement("div");
+            flash.className = "alert alert-danger";
+            flash.innerText = "Failed to create exposure entry!";
+            document.getElementById("flashes").append(flash);
+        }
+    });
 </script>
 </html>
