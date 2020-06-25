@@ -162,7 +162,7 @@ static uint8_t is_exposed = 0;
 void set_exposed(void) {
     if (!is_exposed) {
         is_exposed = 1;
-        // TODO: Toggle LED
+        leds_set(LEDS_RED);
         report_exposure(&known);
     }
 }
