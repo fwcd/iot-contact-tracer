@@ -232,6 +232,7 @@ PROCESS_THREAD(contact_tracer_process, ev, data) {
         // Handle health check response
         if (ev == serial_line_event_message) {
             const char *response = (char *) data;
+            LOG_INFO("Got '%%'\n", response);
             switch (response[0]) {
             case 'E':
                 LOG_DBG("Exposed!\n");

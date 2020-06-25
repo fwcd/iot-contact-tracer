@@ -6,8 +6,8 @@ def create_handler(url):
     class CNGAdapterTCPHandler(StreamRequestHandler):
         def handle(self):
             print("Handling new connection...")
-            while True:
-                raw = self.rfile.readline().decode("utf-8").strip()
+            for line in self.rfile:
+                raw = line.strip().decode("utf-8")
                 req = re.search(r"\[REQUEST\s+(?P<name>\w+)\s*(?P<body>.*)\]", raw)
                 if req:
                     name = req.group("name")
@@ -30,6 +30,7 @@ def create_handler(url):
                             self.wfile.write("H".encode("utf-8"))
                     else:
                         print(f"Unsupported request name: {name}")
-                else:
-                    print(f"Got: {raw}")
+                # else:
+                #     print(f"Got: {raw}")
+            print("Disconnecting")
     return CNGAdapterTCPHandler
