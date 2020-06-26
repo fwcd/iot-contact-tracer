@@ -1,8 +1,9 @@
+import 'package:contact_tracer/service/contact_tracer_service.dart';
 import 'package:flutter/material.dart';
 
 import 'view/home_page.dart';
 
-void main() {
+void main() async {
   runApp(ContactTracerApp());
 }
 

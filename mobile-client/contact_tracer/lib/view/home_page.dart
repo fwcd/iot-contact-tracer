@@ -7,8 +7,6 @@ import 'package:contact_tracer/view/number_list_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
-final ContactTracerService _contactTracer = ContactTracerService();
-
 class ContactTracerHomePage extends StatefulWidget {
   final String backendUrl;
   final String title;
@@ -19,7 +17,7 @@ class ContactTracerHomePage extends StatefulWidget {
   // Fields are always final in a widget subclass.
 
   @override
-  _ContactTracerHomePageState createState() => _ContactTracerHomePageState(
+  _ContactTracerHomePageState createState() =>_ContactTracerHomePageState(
     backendUrl: backendUrl
   );
 }
@@ -33,7 +31,8 @@ class _ContactTracerHomePageState extends State<ContactTracerHomePage> {
   double _broadcastIntervalSec = 10;
   double _rollIntervalSec = 10;
 
-  List<StreamSubscription> contactTracingSubscriptions = [];
+  ContactTracerService _contactTracer = ContactTracerService();
+  List<StreamSubscription> _contactTracingSubscriptions = [];
 
   _ContactTracerHomePageState({this.backendUrl}) : super();
 
@@ -64,6 +63,7 @@ class _ContactTracerHomePageState extends State<ContactTracerHomePage> {
   void _setContactTracingEnabled(bool enabled) async {
     if (_enabled != enabled) {
       if (enabled) {
+        await _contactTracer.initialize();
         var stream = await _contactTracer.start();
         var sub = stream.listen((ident) {
           // TODO: Actually collect these identifiers,
@@ -71,11 +71,11 @@ class _ContactTracerHomePageState extends State<ContactTracerHomePage> {
           // the server if needed
           latestReceivedIdent = ident;
         });
-        contactTracingSubscriptions.add(sub);
+        _contactTracingSubscriptions.add(sub);
       } else {
         await _contactTracer.stop();
-        contactTracingSubscriptions.forEach((sub) { sub.cancel(); });
-        contactTracingSubscriptions = [];
+        _contactTracingSubscriptions.forEach((sub) { sub.cancel(); });
+        _contactTracingSubscriptions = [];
       }
       setState(() {
         _enabled = enabled;

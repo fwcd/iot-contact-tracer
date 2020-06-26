@@ -6,6 +6,9 @@ import 'package:flutter_beacon/flutter_beacon.dart';
 
 const _broadcastInterval = Duration(seconds: 10);
 const _identifier = "iot-contact-tracer";
+const _identBits = 16;
+const _identBytes = _identBits * 8;
+const _maxIdent = 1 << _identBits;
 const _magicUUIDPrefix = "d1e58b99-ddfb-4f13-a8db-aa401904"; // ...missing 2 bytes at the end
 
 class ContactTracerService {
@@ -13,14 +16,20 @@ class ContactTracerService {
   final tx = BeaconBroadcast();
   final Stream<int> currentIdentifier = _startGeneratingIdentifiers();
 
+  bool initialized = false;
   bool running = false;
   List<StreamSubscription> _subscriptions = [];
 
   Future<void> initialize() async {
+    if (initialized) {
+      return;
+    }
+    initialized = true;
     await rx.initializeAndCheckScanning;
 
     // Magic UUID constant that is the same across all contact tracing nodes
     tx.setIdentifier(_identifier); // TODO: iOS only, unfortunately
+    tx.setUUID(_encodeAsUUID(Random().nextInt(_maxIdent)));
     currentIdentifier.listen((ident) { 
       tx.setUUID(_encodeAsUUID(ident));
     });
@@ -52,7 +61,7 @@ class ContactTracerService {
     return Stream.periodic(
       _broadcastInterval,
       (_) {
-        return rng.nextInt(1 << 16);
+        return rng.nextInt(_maxIdent);
       }
     );
   }
@@ -76,6 +85,6 @@ class ContactTracerService {
   }
 
   static int _decodeFromUUID(String uuid) {
-    return int.parse(uuid.substring(uuid.length - 4), radix: 16);
+    return int.parse(uuid.substring(uuid.length - (_identBytes * 2)), radix: 16);
   }
 }
