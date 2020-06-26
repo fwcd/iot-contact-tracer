@@ -15,8 +15,12 @@ Each client node periodically generates pseudorandom 16-bit identifiers (referre
 * The Contact Tracing Protocol
     * Each message consists of an unframed, 16-bit integer representing an identifier
     * Every node receiving such a message is expected to store it for exactly 14 days
-    * Currently only Contiki's Nullnet is supported as a transport
+    * Supported transports:
+        * Contiki's Nullnet
+        * iBeacons (using the last 2 bytes of the UUID for the payload)
 * The REST/JSON API
     * Currently supports two (public) endpoints:
         * `/api/v1/exposures` (`GET`/`DELETE`)
         * `/api/v1/exposures/:id` (`GET`/`PUT`/`DELETE`)
+
+> Note that the different contact-tracing transports are not yet compatible.
