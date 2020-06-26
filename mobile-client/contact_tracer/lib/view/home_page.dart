@@ -5,6 +5,7 @@ import 'package:contact_tracer/model/health_status.dart';
 import 'package:contact_tracer/service/contact_tracer_service.dart';
 import 'package:contact_tracer/view/basic_alert_dialog.dart';
 import 'package:contact_tracer/view/feed_card.dart';
+import 'package:contact_tracer/view/identifier_list.dart';
 import 'package:contact_tracer/view/number_list_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -178,6 +179,12 @@ class _ContactTracerHomePageState extends State<ContactTracerHomePage> {
                   },
                 ),
               ],
+            )
+          ),
+          FeedCard(
+            child: IdentifierList(
+              title: "Exposed Identifiers",
+              identifiers: _exposedIdents,
             )
           )
         ],
