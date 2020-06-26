@@ -4,11 +4,14 @@ from socketserver import StreamRequestHandler
 
 def create_handler(url):
     class CNGAdapterTCPHandler(StreamRequestHandler):
+        def __init__(self):
+            self.regex = re.compile(r"\[REQUEST\s+(?P<name>\w+)\s*(?P<body>.*)\]")
+
         def handle(self):
             print(f"Handling new connection from {self.client_address}...")
             for line in self.rfile:
                 raw = line.strip().decode("utf-8")
-                req = re.search(r"\[REQUEST\s+(?P<name>\w+)\s*(?P<body>.*)\]", raw)
+                req = re.search(self.regex, raw)
                 if req:
                     name = req.group("name")
                     body = req.group("body")
