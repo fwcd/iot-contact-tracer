@@ -41,5 +41,22 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+
+    <!-- Beacons -->
+
+    <!-- When in use -->
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>The app uses beaconing to perform contact tracing.</string>
+    <!-- Always -->
+    <!-- for iOS 11 + -->
+    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+    <string>The app uses beaconing to perform contact tracing.</string>
+    <!-- for iOS 9/10 -->
+    <key>NSLocationAlwaysUsageDescription</key>
+    <string>The app uses beaconing to perform contact tracing.</string>
+    <!-- Bluetooth Privacy -->
+    <!-- for iOS 13 + -->
+    <key>NSBluetoothAlwaysUsageDescription</key>
+    <string>The app uses Bluetooth Low Energy beacons.</string>
 </dict>
 </plist>
