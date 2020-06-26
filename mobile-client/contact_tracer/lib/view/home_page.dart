@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:contact_tracer/model/health_status.dart';
 import 'package:contact_tracer/service/contact_tracer_service.dart';
+import 'package:contact_tracer/view/basic_alert_dialog.dart';
 import 'package:contact_tracer/view/feed_card.dart';
 import 'package:contact_tracer/view/number_list_tile.dart';
 import 'package:flutter/material.dart';
@@ -40,46 +41,46 @@ class _ContactTracerHomePageState extends State<ContactTracerHomePage> {
     var response = await http.get('https://contact-tracer.xyz/api/v1/health');
     await showDialog(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('Got HTTP ${response.statusCode}'),
-          content: Text(response.body),
-          actions: <Widget>[
-            FlatButton(
-              child: Text('Ok'),
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            )
-          ],
-        );
-      }
+      builder: (context) => BasicAlertDialog(
+        title: Text('Got HTTP ${response.statusCode}'),
+        content: Text(response.body),
+      ),
     );
     setState(() {
       _health = response.statusCode == 200 ? HealthStatus.healthy : HealthStatus.exposed;
     });
   }
 
-  void _setContactTracingEnabled(bool enabled) async {
-    if (_enabled != enabled) {
-      if (enabled) {
-        await _contactTracer.initialize();
-        var stream = await _contactTracer.start();
-        var sub = stream.listen((ident) {
-          // TODO: Actually collect these identifiers,
-          // perform health checks and report them to
-          // the server if needed
-          latestReceivedIdent = ident;
+  void _setContactTracingEnabled(bool enabled, BuildContext context) async {
+    try {
+      if (_enabled != enabled) {
+        if (enabled) {
+          await _contactTracer.initialize();
+          var stream = await _contactTracer.start();
+          var sub = stream.listen((ident) {
+            // TODO: Actually collect these identifiers,
+            // perform health checks and report them to
+            // the server if needed
+            latestReceivedIdent = ident;
+          });
+          _contactTracingSubscriptions.add(sub);
+        } else {
+          await _contactTracer.stop();
+          _contactTracingSubscriptions.forEach((sub) { sub.cancel(); });
+          _contactTracingSubscriptions = [];
+        }
+        setState(() {
+          _enabled = enabled;
         });
-        _contactTracingSubscriptions.add(sub);
-      } else {
-        await _contactTracer.stop();
-        _contactTracingSubscriptions.forEach((sub) { sub.cancel(); });
-        _contactTracingSubscriptions = [];
       }
-      setState(() {
-        _enabled = enabled;
-      });
+    } catch (e) {
+      await showDialog(
+        context: context,
+        builder: (context) => BasicAlertDialog(
+          title: Text('Could not toggle contact tracing'),
+          content: Text(e.toString())
+        )
+      );
     }
   }
 
@@ -136,7 +137,7 @@ class _ContactTracerHomePageState extends State<ContactTracerHomePage> {
                   title: Text('Enable Contact Tracing'),
                   subtitle: Text('Periodically broadcast identifiers to nearby devices.'),
                   onChanged: (value) {
-                    _setContactTracingEnabled(value);
+                    _setContactTracingEnabled(value, context);
                   },
                 ),
                 NumberListTile(
