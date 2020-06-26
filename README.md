@@ -8,3 +8,7 @@ A decentralized contact tracing system, inspired by [DP-3T](https://github.com/D
 
 ![Simulation](cooja-simulation.png)
 > Cooja Simulation of the Contiki-NG client nodes
+
+## Continous Deployment
+This project is continously deployed using Github Actions, Github Packages and a Kubernetes cluster hosted by Digitalocean.
+![k8s-cd-setup](k8s-cd-setup.png)
