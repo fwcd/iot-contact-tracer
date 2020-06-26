@@ -1,8 +1,13 @@
+import 'dart:async';
+
 import 'package:contact_tracer/model/health_status.dart';
+import 'package:contact_tracer/service/contact_tracer_service.dart';
 import 'package:contact_tracer/view/feed_card.dart';
 import 'package:contact_tracer/view/number_list_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+
+final ContactTracerService _contactTracer = ContactTracerService();
 
 class ContactTracerHomePage extends StatefulWidget {
   final String backendUrl;
@@ -20,11 +25,15 @@ class ContactTracerHomePage extends StatefulWidget {
 }
 
 class _ContactTracerHomePageState extends State<ContactTracerHomePage> {
-  String backendUrl;
+  final String backendUrl;
+
   HealthStatus _health = HealthStatus.unknown;
+  int latestReceivedIdent = null;
   bool _enabled = false;
   double _broadcastIntervalSec = 10;
   double _rollIntervalSec = 10;
+
+  List<StreamSubscription> contactTracingSubscriptions = [];
 
   _ContactTracerHomePageState({this.backendUrl}) : super();
 
@@ -50,6 +59,28 @@ class _ContactTracerHomePageState extends State<ContactTracerHomePage> {
     setState(() {
       _health = response.statusCode == 200 ? HealthStatus.healthy : HealthStatus.exposed;
     });
+  }
+
+  void _setContactTracingEnabled(bool enabled) async {
+    if (_enabled != enabled) {
+      if (enabled) {
+        var stream = await _contactTracer.start();
+        var sub = stream.listen((ident) {
+          // TODO: Actually collect these identifiers,
+          // perform health checks and report them to
+          // the server if needed
+          latestReceivedIdent = ident;
+        });
+        contactTracingSubscriptions.add(sub);
+      } else {
+        await _contactTracer.stop();
+        contactTracingSubscriptions.forEach((sub) { sub.cancel(); });
+        contactTracingSubscriptions = [];
+      }
+      setState(() {
+        _enabled = enabled;
+      });
+    }
   }
 
   @override
@@ -105,9 +136,7 @@ class _ContactTracerHomePageState extends State<ContactTracerHomePage> {
                   title: Text('Enable Contact Tracing'),
                   subtitle: Text('Periodically broadcast identifiers to nearby devices.'),
                   onChanged: (value) {
-                    setState(() {
-                      _enabled = value;
-                    });
+                    _setContactTracingEnabled(value);
                   },
                 ),
                 NumberListTile(
@@ -147,7 +176,9 @@ class _ContactTracerHomePageState extends State<ContactTracerHomePage> {
           height: 40.0,
           child: Padding(
             padding: EdgeInsets.all(12.0),
-            child: Text('Backend: $backendUrl')
+            child: latestReceivedIdent == null
+              ? Text('Backend: $backendUrl')
+              : Text('Latest Received Identifier: $latestReceivedIdent')
           )
         )
       ),

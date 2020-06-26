@@ -72,7 +72,7 @@ class ContactTracerService {
   }
 
   static String _encodeAsUUID(int ident) {
-    return "$_magicUUIDPrefix${ident.toRadixString(16)}";
+    return '$_magicUUIDPrefix${ident.toRadixString(16)}';
   }
 
   static int _decodeFromUUID(String uuid) {
