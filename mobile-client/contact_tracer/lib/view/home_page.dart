@@ -41,7 +41,7 @@ class _ContactTracerHomePageState extends State<ContactTracerHomePage> {
   Set<String> _ownIdents = Set();
   List<StreamSubscription> _contactTracingSubscriptions = [];
 
-  _ContactTracerHomePageState({this.backendUrl}) : super();
+  _ContactTracerHomePageState({this.backendUrl});
 
   void _queryHealth(BuildContext context) async {
     var response = await http.get('https://contact-tracer.xyz/api/v1/exposures');
