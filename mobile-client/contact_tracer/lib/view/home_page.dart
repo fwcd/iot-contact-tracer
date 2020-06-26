@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:contact_tracer/model/health_status.dart';
 import 'package:contact_tracer/service/contact_tracer_service.dart';
@@ -27,27 +28,43 @@ class _ContactTracerHomePageState extends State<ContactTracerHomePage> {
   final String backendUrl;
 
   HealthStatus _health = HealthStatus.unknown;
-  int latestReceivedIdent = null;
+  List<String> _exposedIdents = [];
+
+  int _latestReceivedIdent;
   bool _enabled = false;
   double _broadcastIntervalSec = 10;
   double _rollIntervalSec = 10;
 
+  // TODO: Actually use the configured intervals in the contact tracer service
+
   ContactTracerService _contactTracer = ContactTracerService();
+  Set<String> _ownIdents = Set();
   List<StreamSubscription> _contactTracingSubscriptions = [];
 
   _ContactTracerHomePageState({this.backendUrl}) : super();
 
   void _queryHealth(BuildContext context) async {
-    var response = await http.get('https://contact-tracer.xyz/api/v1/health');
-    await showDialog(
-      context: context,
-      builder: (context) => BasicAlertDialog(
-        title: Text('Got HTTP ${response.statusCode}'),
-        content: Text(response.body),
-      ),
-    );
+    var response = await http.get('https://contact-tracer.xyz/api/v1/exposures');
+    var decoded = json.decode(response.body);
+    List<String> exposures = decoded.map((e) => e['id']).toList().cast<String>();
+    Set<String> exposureSet = exposures.toSet();
+    bool exposed = _ownIdents.any((ident) => exposureSet.contains(ident));
+
+    if (exposed && _health != HealthStatus.exposed) {
+      await showDialog(
+        context: context,
+        builder: (context) => BasicAlertDialog(
+          title: Text('You are at risk of being exposed to COVID-19!'),
+          content: Text(response.body),
+        ),
+      );
+
+      // TODO: Report _ownIdents to the server
+    }
+
     setState(() {
-      _health = response.statusCode == 200 ? HealthStatus.healthy : HealthStatus.exposed;
+      _exposedIdents = exposures;
+      _health = exposed ? HealthStatus.exposed : HealthStatus.healthy;
     });
   }
 
@@ -58,10 +75,10 @@ class _ContactTracerHomePageState extends State<ContactTracerHomePage> {
           await _contactTracer.initialize();
           var stream = await _contactTracer.start();
           var sub = stream.listen((ident) {
-            // TODO: Actually collect these identifiers,
-            // perform health checks and report them to
-            // the server if needed
-            latestReceivedIdent = ident;
+            // TODO: Automatically perform health check,
+            // perhaps in a throttled way?
+            _ownIdents.add(ident.toRadixString(16));
+            _latestReceivedIdent = ident;
           });
           _contactTracingSubscriptions.add(sub);
         } else {
@@ -177,9 +194,9 @@ class _ContactTracerHomePageState extends State<ContactTracerHomePage> {
           height: 40.0,
           child: Padding(
             padding: EdgeInsets.all(12.0),
-            child: latestReceivedIdent == null
+            child: _latestReceivedIdent == null
               ? Text('Backend: $backendUrl')
-              : Text('Latest Received Identifier: $latestReceivedIdent')
+              : Text('Latest Received Identifier: $_latestReceivedIdent')
           )
         )
       ),
