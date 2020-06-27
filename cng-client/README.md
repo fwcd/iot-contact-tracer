@@ -38,3 +38,5 @@ To use external plugins, first create a folder named `cooja-plugins`, then place
 * Append `;PATH/TO/THIS_FOLDER/cooja-plugins/YOUR_PLUGIN` to the variable `DEFAULT_PROJECTDIRS`
     * Replace `YOUR_PLUGIN` with the name of your plugin
     * If you are running Cooja using Docker, replace `PATH/TO/THIS/FOLDER` with `/home/user`
+* Now open `Settings` > `Cooja Extensions`
+* Select your plugin and click `Apply for session`
