@@ -37,9 +37,16 @@ class _ContactTracerHomePageState extends State<ContactTracerHomePage> {
 
   ContactTracerService _contactTracer = ContactTracerService();
   Set<String> _ownIdents = Set();
+  Set<String> _receivedIdents = Set();
   List<StreamSubscription> _contactTracingSubscriptions = [];
 
-  _ContactTracerHomePageState({this.backendUrl});
+  _ContactTracerHomePageState({this.backendUrl}) {
+    _contactTracer.currentIdentifier.listen((ident) {
+      setState(() {
+        _ownIdents.add(ident.toRadixString(16));
+      });
+    });
+  }
 
   void _queryHealth(BuildContext context) async {
     var response = await http.get('$backendUrl/api/v1/exposures');
@@ -77,8 +84,10 @@ class _ContactTracerHomePageState extends State<ContactTracerHomePage> {
           var sub = stream.listen((ident) {
             // TODO: Automatically perform health check,
             // perhaps in a throttled way?
-            _ownIdents.add(ident.toRadixString(16));
-            _latestReceivedIdent = ident;
+            setState(() {
+              _receivedIdents.add(ident.toRadixString(16));
+              _latestReceivedIdent = ident;
+            });
           });
           _contactTracingSubscriptions.add(sub);
         } else {
@@ -166,15 +175,9 @@ class _ContactTracerHomePageState extends State<ContactTracerHomePage> {
                       _simulateExposure = value;
                     });
                   },
-                )
+                ),
               ],
-            )
-          ),
-          FeedCard(
-            child: IdentifierList(
-              title: "Exposed Identifiers",
-              identifiers: _exposedIdents,
-            )
+            ),
           ),
           FeedCard(
             child: IdentifierList(
@@ -185,8 +188,20 @@ class _ContactTracerHomePageState extends State<ContactTracerHomePage> {
                   _ownIdents.clear();
                 });
               },
-            )
-          )
+            ),
+          ),
+          FeedCard(
+            child: IdentifierList(
+              title: "Exposed Identifiers",
+              identifiers: _exposedIdents,
+            ),
+          ),
+          FeedCard(
+            child: IdentifierList(
+              title: "Received Identifiers",
+              identifiers: _receivedIdents.toList(),
+            ),
+          ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
