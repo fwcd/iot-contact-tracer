@@ -10,7 +10,7 @@ A decentralized contact tracing system, inspired by [DP-3T](https://github.com/D
 > Cooja Simulation of the Contiki-NG client nodes
 
 ## How it works
-Each client node periodically generates pseudorandom 16-bit identifiers (referred to as "rolling identifiers") and and distributes the most recent identifier at a fixed interval. There are two protocols involved here:
+Each client node periodically generates pseudorandom 16-bit identifiers (referred to as "rolling identifiers") and distributes the most recent identifier at a fixed interval. There are two protocols involved here:
 
 * The Contact Tracing Protocol
     * Each message consists of an unframed, 16-bit integer representing an identifier
