@@ -4,7 +4,7 @@ import 'dart:math';
 import 'package:beacon_broadcast/beacon_broadcast.dart';
 import 'package:flutter_beacon/flutter_beacon.dart';
 
-const _broadcastInterval = Duration(seconds: 10);
+const _rollInterval = Duration(seconds: 10);
 const _identifier = "iot-contact-tracer";
 const _identBits = 16;
 const _identBytes = _identBits * 8;
@@ -59,7 +59,7 @@ class ContactTracerService {
   static Stream<int> _startGeneratingIdentifiers() {
     var rng = Random();
     return Stream.periodic(
-      _broadcastInterval,
+      _rollInterval,
       (_) {
         return rng.nextInt(_maxIdent);
       }
