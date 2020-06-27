@@ -33,6 +33,7 @@ class _ContactTracerHomePageState extends State<ContactTracerHomePage> {
 
   int _latestReceivedIdent;
   bool _enabled = false;
+  bool _simulateExposure = false;
 
   ContactTracerService _contactTracer = ContactTracerService();
   Set<String> _ownIdents = Set();
@@ -45,18 +46,18 @@ class _ContactTracerHomePageState extends State<ContactTracerHomePage> {
     var decoded = json.decode(response.body);
     List<String> exposures = decoded.map((e) => e['id']).toList().cast<String>();
     Set<String> exposureSet = exposures.toSet();
-    bool exposed = _ownIdents.any((ident) => exposureSet.contains(ident));
+    bool exposed = _ownIdents.any((ident) => exposureSet.contains(ident)) || _simulateExposure;
 
     if (exposed && _health != HealthStatus.exposed) {
       await showDialog(
         context: context,
         builder: (context) => BasicAlertDialog(
-          title: Text('You are at risk of being exposed to COVID-19!'),
+          title: Text('You are at risk of being exposed to COVID-19! Your identifiers will now be uploaded to the server.'),
           content: Text(response.body),
         ),
-      );
 
-      // TODO: Report _ownIdents to the server
+        // TODO: Upload identifiers
+      );
     }
 
     setState(() {
@@ -154,6 +155,16 @@ class _ContactTracerHomePageState extends State<ContactTracerHomePage> {
                     _setContactTracingEnabled(value, context);
                   },
                 ),
+                SwitchListTile(
+                  value: _simulateExposure,
+                  title: Text('Simulate Exposure'),
+                  subtitle: Text('Every health check is treated as an exposure.'),
+                  onChanged: (value) {
+                    setState(() {
+                      _simulateExposure = value;
+                    });
+                  },
+                )
               ],
             )
           ),
