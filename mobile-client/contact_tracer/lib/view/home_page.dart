@@ -33,10 +33,6 @@ class _ContactTracerHomePageState extends State<ContactTracerHomePage> {
 
   int _latestReceivedIdent;
   bool _enabled = false;
-  double _broadcastIntervalSec = 10;
-  double _rollIntervalSec = 10;
-
-  // TODO: Actually use the configured intervals in the contact tracer service
 
   ContactTracerService _contactTracer = ContactTracerService();
   Set<String> _ownIdents = Set();
@@ -156,26 +152,6 @@ class _ContactTracerHomePageState extends State<ContactTracerHomePage> {
                   subtitle: Text('Periodically broadcast identifiers to nearby devices.'),
                   onChanged: (value) {
                     _setContactTracingEnabled(value, context);
-                  },
-                ),
-                NumberListTile(
-                  title: Text('Broadcast Interval'),
-                  subtitle: Text('in seconds'),
-                  value: _broadcastIntervalSec,
-                  onEditingComplete: (value) {
-                    setState(() {
-                      _broadcastIntervalSec = value;
-                    });
-                  },
-                ),
-                NumberListTile(
-                  title: Text('Roll Interval'),
-                  subtitle: Text('in seconds'),
-                  value: _rollIntervalSec,
-                  onEditingComplete: (value) {
-                    setState(() {
-                      _rollIntervalSec = value;
-                    });
                   },
                 ),
               ],
