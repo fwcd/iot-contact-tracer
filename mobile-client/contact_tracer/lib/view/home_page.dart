@@ -162,6 +162,12 @@ class _ContactTracerHomePageState extends State<ContactTracerHomePage> {
               title: "Exposed Identifiers",
               identifiers: _exposedIdents,
             )
+          ),
+          FeedCard(
+            child: IdentifierList(
+              title: "Own Identifiers",
+              identifiers: _ownIdents.toList(),
+            )
           )
         ],
       ),
