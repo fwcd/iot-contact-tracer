@@ -42,7 +42,7 @@ class _ContactTracerHomePageState extends State<ContactTracerHomePage> {
   _ContactTracerHomePageState({this.backendUrl});
 
   void _queryHealth(BuildContext context) async {
-    var response = await http.get('https://contact-tracer.xyz/api/v1/exposures');
+    var response = await http.get('$backendUrl/api/v1/exposures');
     var decoded = json.decode(response.body);
     List<String> exposures = decoded.map((e) => e['id']).toList().cast<String>();
     Set<String> exposureSet = exposures.toSet();
@@ -52,12 +52,14 @@ class _ContactTracerHomePageState extends State<ContactTracerHomePage> {
       await showDialog(
         context: context,
         builder: (context) => BasicAlertDialog(
-          title: Text('You are at risk of being exposed to COVID-19! Your identifiers will now be uploaded to the server.'),
-          content: Text(response.body),
+          title: Text('You are at risk of being exposed to COVID-19!'),
+          content: Text('Your identifiers will now be uploaded to the server.'),
         ),
-
-        // TODO: Upload identifiers
       );
+
+      for (var ident in _ownIdents) {
+        await http.put('$backendUrl/api/v1/exposures/$ident');
+      }
     }
 
     setState(() {
