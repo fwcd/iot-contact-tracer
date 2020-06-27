@@ -29,3 +29,12 @@ Or - alternatively - inside the container:
 
 ## Building and Running the Project in Cooja
 First, open Cooja as described above. Then create a new simulation (in the `File` menu) and add a new `Cooja` mote, where the `*.c` source file from the project is configured as your `Contiki process/Firmware`. Now add as many motes as you like and start the simulation.
+
+## Using External Plugins such as Mobility
+To use external plugins, first create a folder named `cooja-plugins`, then place your plugin (e.g. [Mobility](https://anrg.usc.edu/contiki/index.php/Mobility_of_Nodes_in_Cooja)) in a subfolder. Then:
+
+* Open Cooja
+* Open `Settings` > `External Tool Paths`
+* Append `;PATH/TO/THIS_FOLDER/cooja-plugins/YOUR_PLUGIN` to the variable `DEFAULT_PROJECTDIRS`
+    * Replace `YOUR_PLUGIN` with the name of your plugin
+    * If you are running Cooja using Docker, replace `PATH/TO/THIS/FOLDER` with `/home/user`
