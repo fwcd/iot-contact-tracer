@@ -180,6 +180,11 @@ class _ContactTracerHomePageState extends State<ContactTracerHomePage> {
             child: IdentifierList(
               title: "Own Identifiers",
               identifiers: _ownIdents.toList(),
+              onClear: () {
+                setState(() {
+                  _ownIdents.clear();
+                });
+              },
             )
           )
         ],
