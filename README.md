@@ -28,6 +28,6 @@ Each client node periodically generates pseudorandom 16-bit identifiers (referre
 
 > Note that the different contact-tracing transports are not yet compatible.
 
-## Continous Deployment
-This project is continously deployed using GitHub Actions, GitHub Packages and a Kubernetes cluster hosted by Digitalocean.
+## Continuous Deployment
+This project is continuously deployed using GitHub Actions, GitHub Packages and a Kubernetes cluster hosted by Digitalocean.
 ![k8s-cd-setup](k8s-cd-setup.png)
