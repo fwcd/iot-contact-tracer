@@ -8,6 +8,7 @@
 #include <net/netstack.h>
 #include <sys/node-id.h>
 #include <sys/log.h>
+#include <sys/energest.h>
 
 #define LOG_MODULE "Contact tracer"
 #define LOG_LEVEL LOG_LEVEL_INFO
@@ -194,6 +195,7 @@ void receive(const void *data, uint16_t len, const linkaddr_t *src, const linkad
 // == Main ==
 
 PROCESS(contact_tracer_process, "Contact tracer process");
+PROCESS(energest_logging_process, "Energest logging process");
 AUTOSTART_PROCESSES(&contact_tracer_process);
 
 PROCESS_THREAD(contact_tracer_process, ev, data) {
@@ -209,6 +211,7 @@ PROCESS_THREAD(contact_tracer_process, ev, data) {
     if (node_id == 1) {
         identifier_store_roll(&known.own);
         set_exposed();
+        process_start(&energest_logging_process, NULL);
     }
 
     while (true) {
@@ -249,5 +252,45 @@ PROCESS_THREAD(contact_tracer_process, ev, data) {
         }
     }
 
+    PROCESS_END();
+}
+
+
+static long to_seconds(uint64_t time)
+{
+    return (long)(time / ENERGEST_SECOND);
+}
+
+static long to_miliseconds(uint64_t time)
+{
+    return (long)(time / (double) ENERGEST_SECOND * 1000);
+}
+
+PROCESS_THREAD(energest_logging_process, ev, data)
+{
+    static struct etimer periodic_timer;
+    PROCESS_BEGIN();
+
+                etimer_set(&periodic_timer, CLOCK_SECOND * 10);
+                while(1) {
+                    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&periodic_timer));
+                    etimer_reset(&periodic_timer);
+
+                    /* Update all energest times. */
+                    energest_flush();
+
+                    LOG_INFO("Energest:\n");
+                    LOG_INFO("Total time %lus   CPU %lums   LPM %lums    DEEP LPM %lums\n",
+                             to_seconds(ENERGEST_GET_TOTAL_TIME()),
+                             to_miliseconds(energest_type_time(ENERGEST_TYPE_CPU)),
+                             to_miliseconds(energest_type_time(ENERGEST_TYPE_LPM)),
+                             to_miliseconds(energest_type_time(ENERGEST_TYPE_DEEP_LPM)));
+                    LOG_INFO("Radio LISTEN %lums    TRANSMIT %lums    OFF %lums\n",
+                             to_miliseconds(energest_type_time(ENERGEST_TYPE_LISTEN)),
+                             to_miliseconds(energest_type_time(ENERGEST_TYPE_TRANSMIT)),
+                             to_miliseconds(ENERGEST_GET_TOTAL_TIME()
+                                      - energest_type_time(ENERGEST_TYPE_TRANSMIT)
+                                      - energest_type_time(ENERGEST_TYPE_LISTEN)));
+                }
     PROCESS_END();
 }
