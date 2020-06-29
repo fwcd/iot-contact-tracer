@@ -10,7 +10,7 @@ def create_handler(url):
             print(f"Handling new connection from {self.client_address}...")
             for line in self.rfile:
                 raw = line.strip().decode("utf-8")
-                req = re.search(regex, raw)
+                req = re.search(CNGAdapterTCPHandler.regex, raw)
                 if req:
                     name = req.group("name")
                     body = req.group("body")
